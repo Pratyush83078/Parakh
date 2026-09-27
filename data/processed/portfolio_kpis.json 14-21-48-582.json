@@ -1,0 +1,20 @@
+{
+  "total_projects": 2059,
+  "total_original_cost_cr": 3908402.08,
+  "total_revised_cost_cr": 4320719.91,
+  "total_expenditure_cr": 2040976.79,
+  "total_cost_overrun_cr": 562507.18,
+  "risk_band_counts": {
+    "Low": 1044,
+    "Medium": 831,
+    "High": 171,
+    "Critical": 13
+  },
+  "primary_risk_drivers": {
+    "Slow Physical Progress": 918,
+    "Schedule Delay": 750,
+    "Cost Escalation": 319,
+    "Excessive Expenditure": 51,
+    "Repeated Revisions": 21
+  }
+}

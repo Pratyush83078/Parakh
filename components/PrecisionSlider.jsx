@@ -41,6 +41,8 @@ export default function PrecisionSlider({
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: 6,
+          flexWrap: 'wrap',
+          gap: 6,
         }}
       >
         <label
@@ -55,7 +57,7 @@ export default function PrecisionSlider({
           {label}
         </label>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           {/* Main Value Pill */}
           <span
             style={{
@@ -142,6 +144,8 @@ export default function PrecisionSlider({
           fontSize: '10px',
           fontFamily: "var(--font-geist-mono), monospace",
           color: 'var(--ink-muted, #94A3B8)',
+          flexWrap: 'wrap',
+          gap: 4,
         }}
       >
         <span>{prefix}{min}{unit}</span>

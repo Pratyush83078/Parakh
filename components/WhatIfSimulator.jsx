@@ -127,9 +127,9 @@ export default function WhatIfSimulator({ project: externalProject }) {
           gap: 8,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
           <Sliders size={14} color="#0066FF" />
-          <span style={{ fontSize: 12.5, fontWeight: 700, fontFamily: 'var(--font-geist-mono), monospace' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-geist-mono), monospace' }}>
             WHAT-IF SENSITIVITY SIMULATOR
           </span>
           <span style={{ fontSize: 11, color: 'var(--ink-secondary, #64748B)', fontFamily: 'var(--font-geist-mono)' }}>
@@ -137,9 +137,9 @@ export default function WhatIfSimulator({ project: externalProject }) {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {!externalProject && (
-            <div style={{ display: 'flex', gap: 4 }}>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               {LANDMARK_PRESETS.map((p, idx) => (
                 <button
                   key={p.project_code}
@@ -198,13 +198,17 @@ export default function WhatIfSimulator({ project: externalProject }) {
           borderRadius: 5,
           marginBottom: 12,
           fontSize: 11.5,
+          flexWrap: 'wrap',
+          gap: 6,
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', minWidth: 0 }}>
           <span style={{ fontFamily: 'var(--font-geist-mono)', fontWeight: 700, color: '#0066FF' }}>
             #{activeProject.project_code}
           </span>
-          <strong style={{ color: 'var(--ink, #0F172A)' }}>
+          <strong style={{ color: 'var(--ink, #0F172A)', wordBreak: 'break-word' }}>
             {activeProject.project_name}
           </strong>
           <span style={{ color: 'var(--ink-secondary, #64748B)', fontSize: 11 }}>
@@ -212,7 +216,7 @@ export default function WhatIfSimulator({ project: externalProject }) {
           </span>
         </div>
 
-        <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 11.5, flexShrink: 0, marginLeft: 12 }}>
+        <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 11.5, flexShrink: 0 }}>
           <span style={{ color: 'var(--ink-secondary, #64748B)' }}>Baseline: </span>
           <strong style={{ color: 'var(--ink, #0F172A)' }}>{baselineScore.toFixed(1)}/100</strong>
         </div>

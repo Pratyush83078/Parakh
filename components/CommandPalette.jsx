@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Sparkles, ArrowRight, Layers, BarChart2, BookOpen, AlertTriangle } from 'lucide-react';
+import { Search, Sparkles, ArrowRight, Layers, BarChart2, BookOpen, ExternalLink } from 'lucide-react';
 
 const QUICK_NAV = [
   { label: 'Dashboard & Risk Radar', href: '/', icon: Sparkles },
@@ -13,8 +13,9 @@ const QUICK_NAV = [
 
 const FEATURED_PROJECTS = [
   { project_code: '705368', project_name: 'Araria - Supaul (92 km) New Rail Line', ministry: 'Ministry of Railways', state: 'Bihar', risk_band: 'Critical', risk_score: 91.9 },
-  { project_code: '5422', project_name: 'USBRL Rail Link (Kashmir Valley)', ministry: 'Ministry of Railways', state: 'Jammu and Kashmir', risk_band: 'Critical', risk_score: 89.2 },
-  { project_code: '11054', project_name: 'Mumbai Trans Harbour Link (MTHL)', ministry: 'MoRTH', state: 'Maharashtra', risk_band: 'Low', risk_score: 28.5 },
+  { project_code: '603945', project_name: 'Integrated Anandpur Barrage Project', ministry: 'Dept of Water Resources', state: 'Odisha', risk_band: 'Critical', risk_score: 85.2 },
+  { project_code: '705635', project_name: 'Trivandrum- Kanyakumari Rail Doubling', ministry: 'Ministry of Railways', state: 'Kerala, Tamil Nadu', risk_band: 'Critical', risk_score: 85.2 },
+  { project_code: '619064', project_name: 'Vadodara Mumbai Expressway Phase IB', ministry: 'MoRTH', state: 'Maharashtra, Gujarat', risk_band: 'High', risk_score: 73.6 },
 ];
 
 export default function CommandPalette() {
@@ -32,7 +33,7 @@ export default function CommandPalette() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsOpen((prev) => !prev);
-      } else if (e.key === 'Escape' && isOpen) {
+      } else if (e.key === 'Escape') {
         setIsOpen(false);
       }
     };
@@ -45,7 +46,7 @@ export default function CommandPalette() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('open-cmdk', handleCustomOpen);
     };
-  }, [isOpen]);
+  }, []);
 
   // Focus input on modal open
   useEffect(() => {
@@ -66,11 +67,13 @@ export default function CommandPalette() {
       return;
     }
 
+    let isCurrent = true;
+    setLoading(true);
+
     const timer = setTimeout(async () => {
-      setLoading(true);
       try {
-        const res = await fetch(`/api/projects?search=${encodeURIComponent(query.trim())}&page=1&limit=8`);
-        if (res.ok) {
+        const res = await fetch(`/api/projects?search=${encodeURIComponent(query.trim())}&page=1&limit=10`);
+        if (res.ok && isCurrent) {
           const json = await res.json();
           const items = Array.isArray(json.data)
             ? json.data
@@ -81,11 +84,16 @@ export default function CommandPalette() {
       } catch (err) {
         console.error('Telemetry search error:', err);
       } finally {
-        setLoading(false);
+        if (isCurrent) {
+          setLoading(false);
+        }
       }
-    }, 120);
+    }, 150);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isCurrent = false;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   if (!isOpen) return null;
@@ -97,7 +105,12 @@ export default function CommandPalette() {
 
   const handleSelectProject = (code) => {
     setIsOpen(false);
-    router.push(`/projects?search=${encodeURIComponent(code)}`);
+    router.push(`/projects?search=${encodeURIComponent(code)}&project=${encodeURIComponent(code)}`);
+  };
+
+  const handleSearchAll = (q) => {
+    setIsOpen(false);
+    router.push(`/projects?search=${encodeURIComponent(q)}`);
   };
 
   const currentList = query.trim() ? results : FEATURED_PROJECTS;
@@ -111,8 +124,10 @@ export default function CommandPalette() {
       setSelectedIndex((prev) => (prev - 1 + currentList.length) % (currentList.length || 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (currentList[selectedIndex]) {
+      if (currentList && currentList[selectedIndex]) {
         handleSelectProject(currentList[selectedIndex].project_code || currentList[selectedIndex].code);
+      } else if (query.trim()) {
+        handleSearchAll(query.trim());
       }
     }
   };
@@ -122,15 +137,15 @@ export default function CommandPalette() {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 9999,
-        background: 'rgba(15, 23, 42, 0.4)',
+        zIndex: 99999,
+        background: 'rgba(15, 23, 42, 0.45)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingTop: '14vh',
-        paddingLeft: 16,
-        paddingRight: 16,
+        paddingTop: 'min(12vh, 80px)',
+        paddingLeft: 12,
+        paddingRight: 12,
       }}
       onClick={() => setIsOpen(false)}
     >
@@ -143,6 +158,9 @@ export default function CommandPalette() {
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0,0,0,0.08)',
           overflow: 'hidden',
           animation: 'fadeIn 0.12s ease-out',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: 'min(640px, 86vh)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -154,6 +172,7 @@ export default function CommandPalette() {
             gap: 12,
             padding: '12px 18px',
             borderBottom: '1px solid #E2E8F0',
+            flexShrink: 0,
           }}
         >
           <Search size={18} color="#0066FF" />
@@ -196,25 +215,75 @@ export default function CommandPalette() {
         </div>
 
         {/* Results List */}
-        <div style={{ maxHeight: 380, overflowY: 'auto', padding: '8px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
           <div>
             <div
               style={{
-                fontSize: 10,
-                fontFamily: 'var(--font-geist-mono)',
-                fontWeight: 700,
-                color: '#94A3B8',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
                 padding: '4px 8px 6px',
               }}
             >
-              {query.trim() ? 'Search Results' : 'Featured Critical Projects'}
+              <span
+                style={{
+                  fontSize: 10,
+                  fontFamily: 'var(--font-geist-mono)',
+                  fontWeight: 700,
+                  color: '#94A3B8',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                {query.trim() ? `Search Results (${results.length})` : 'Featured Critical Projects'}
+              </span>
+
+              {query.trim() && (
+                <button
+                  type="button"
+                  onClick={() => handleSearchAll(query.trim())}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: 11,
+                    fontFamily: 'var(--font-geist-mono)',
+                    color: '#0066FF',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 3,
+                  }}
+                >
+                  <span>Explore all in table</span>
+                  <ExternalLink size={10} />
+                </button>
+              )}
             </div>
 
             {query.trim() && !loading && results.length === 0 ? (
-              <div style={{ padding: '20px 12px', textAlign: 'center', fontSize: 12.5, color: '#64748B' }}>
-                No projects found matching "<strong>{query}</strong>".
+              <div style={{ padding: '24px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 13, color: '#0F172A', fontWeight: 600, marginBottom: 4 }}>
+                  No projects found matching "{query}"
+                </div>
+                <p style={{ fontSize: 11.5, color: '#64748B', marginBottom: 12 }}>
+                  Try searching by ministry name, state, or specific project code.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleSearchAll(query.trim())}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: 11.5,
+                    fontFamily: 'var(--font-geist-mono)',
+                    background: '#0F172A',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Search on Central Sector Explorer ↗
+                </button>
               </div>
             ) : (
               currentList.map((p, idx) => {
@@ -303,7 +372,7 @@ export default function CommandPalette() {
             >
               Navigation
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 4 }}>
               {QUICK_NAV.map((nav) => {
                 const Icon = nav.icon;
                 return (
@@ -347,6 +416,7 @@ export default function CommandPalette() {
             fontSize: 10.5,
             fontFamily: 'var(--font-geist-mono)',
             color: '#64748B',
+            flexShrink: 0,
           }}
         >
           <span>Live telemetry across 2,059 projects</span>

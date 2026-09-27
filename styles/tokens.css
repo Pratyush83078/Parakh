@@ -47,11 +47,11 @@
 
 :root {
   /* ── 1. PRIMITIVES (Fonts & Core Scales) ────────────────────────────────── */
-  --font-display:       'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body:          'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-sans:          'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono:          'Geist Mono', ui-monospace, monospace;
-  --font-pixel:         'Geist Pixel', monospace;
+  --font-display:       var(--font-geist-sans), 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:          var(--font-geist-sans), 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans:          var(--font-geist-sans), 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:          var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace;
+  --font-pixel:         var(--font-geist-pixel), 'Geist Pixel', monospace;
   --font-hand:          'Caveat', cursive;
 
   /* Transitions */

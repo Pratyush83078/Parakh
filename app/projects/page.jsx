@@ -41,25 +41,19 @@ function SortIcon({ col, sortBy, order }) {
 function ProjectsContent() {
   const searchParams = useSearchParams();
   const initialBand = searchParams?.get('band') || '';
+  const initialSearch = searchParams?.get('search') || '';
 
   const { data: filtersData } = useApi(api.filters);
 
-  const [search, setSearch]     = useState('');
-  const [band, setBand]         = useState(initialBand);
-  const [ministry, setMinistry] = useState('');
-  const [state, setState]       = useState('');
-  const [driver, setDriver]     = useState('');
-  const [sortBy, setSortBy]     = useState('risk_score');
-  const [order, setOrder]       = useState('desc');
-  const [page, setPage]         = useState(1);
-
-  useEffect(() => {
-    const b = searchParams?.get('band');
-    if (b !== null && b !== undefined) {
-      setBand(b);
-      setPage(1);
-    }
-  }, [searchParams]);
+  const [search, setSearch]                   = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const [band, setBand]                       = useState(initialBand);
+  const [ministry, setMinistry]               = useState('');
+  const [state, setState]                     = useState('');
+  const [driver, setDriver]                   = useState('');
+  const [sortBy, setSortBy]                   = useState('risk_score');
+  const [order, setOrder]                     = useState('desc');
+  const [page, setPage]                       = useState(1);
 
   const [projects, setProjects] = useState([]);
   const [meta, setMeta]         = useState({ total_projects: 0, total_pages: 1 });
@@ -69,11 +63,51 @@ function ProjectsContent() {
   const [peers, setPeers]       = useState(null);
   const [dispatchToast, setDispatchToast] = useState(null);
 
+  const openProject = useCallback(async (code) => {
+    if (!code) return;
+    try {
+      const [proj, peerData] = await Promise.all([
+        api.project(code),
+        api.peers(code).catch(() => null),
+      ]);
+      setSelected(proj);
+      setPeers(peerData);
+    } catch (e) {
+      console.error('Failed to load project detail', e);
+    }
+  }, []);
+
+  // Sync with searchParams on mount or navigation (e.g. from CommandPalette)
+  useEffect(() => {
+    const b = searchParams?.get('band');
+    if (b !== null && b !== undefined) {
+      setBand(b);
+    }
+    const s = searchParams?.get('search');
+    if (s !== null && s !== undefined) {
+      setSearch(s);
+      setDebouncedSearch(s);
+    }
+    const p = searchParams?.get('project');
+    if (p) {
+      openProject(p);
+    }
+    setPage(1);
+  }, [searchParams, openProject]);
+
+  // Debounce search input typing to prevent race conditions
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
       const params = { page, limit: 25, sort_by: sortBy, order };
-      if (search)   params.search    = search;
+      if (debouncedSearch && debouncedSearch.trim()) params.search = debouncedSearch.trim();
       if (band)     params.risk_band = band;
       if (ministry) params.ministry  = ministry;
       if (state)    params.state     = state;
@@ -87,7 +121,7 @@ function ProjectsContent() {
     } finally {
       setLoading(false);
     }
-  }, [search, band, ministry, state, driver, sortBy, order, page]);
+  }, [debouncedSearch, band, ministry, state, driver, sortBy, order, page]);
 
   useEffect(() => {
     fetchProjects();
@@ -96,16 +130,7 @@ function ProjectsContent() {
   // Reset page to 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [search, band, ministry, state, driver]);
-
-  async function openProject(code) {
-    const [proj, peerData] = await Promise.all([
-      api.project(code),
-      api.peers(code).catch(() => null),
-    ]);
-    setSelected(proj);
-    setPeers(peerData);
-  }
+  }, [debouncedSearch, band, ministry, state, driver]);
 
   function toggleSort(col) {
     if (sortBy === col) {
@@ -118,6 +143,7 @@ function ProjectsContent() {
 
   function resetFilters() {
     setSearch('');
+    setDebouncedSearch('');
     setBand('');
     setMinistry('');
     setState('');
@@ -135,7 +161,7 @@ function ProjectsContent() {
 
   const handleExport = () => {
     if (!projects || projects.length === 0) return;
-    exportToCsv(projects, `infralens_projects_page_${page}.csv`);
+    exportToCsv(projects, `parakh_ai_projects_page_${page}.csv`);
   };
 
   const ministries = filtersData?.ministries || [];
@@ -331,7 +357,7 @@ function ProjectsContent() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="sm-table-scroll-wrapper">
           <table className="sm-table">
             <thead>
               <tr>

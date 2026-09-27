@@ -53,7 +53,7 @@ export default function About() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 32, alignItems: 'start' }}>
+      <div className="sm-about-layout">
         {/* Sticky Doc Sidebar */}
         <aside style={{ position: 'sticky', top: 24, background: 'var(--surface-subtle, #F8FAFC)', border: '1px solid var(--border-color, #E2E8F0)', borderRadius: 8, padding: 16 }}>
           <div style={{ paddingBottom: 12, borderBottom: '1px solid var(--border-color, #E2E8F0)', marginBottom: 12 }}>
@@ -94,7 +94,7 @@ export default function About() {
           </nav>
 
           <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border-color, #E2E8F0)', fontSize: 11, color: 'var(--ink-secondary, #64748B)' }}>
-            <strong style={{ color: 'var(--ink, #0F172A)' }}>infralens ✦ Engine</strong>
+            <strong style={{ color: 'var(--ink, #0F172A)' }}>parakh-ai ✦ Engine</strong>
             <div>MoSPI IPMD SIH 26103</div>
           </div>
         </aside>
@@ -120,7 +120,7 @@ export default function About() {
             <p style={{ fontSize: 13.5, color: 'var(--ink-secondary, #475569)', lineHeight: 1.6, marginTop: 12 }}>
               India's <strong>₹34.8 lakh crore</strong> central infrastructure portfolio faces over <strong>₹4.92 lakh crore</strong> in
               cumulative cost overruns. Conventional reporting systems only report <em>what already slipped</em> months after budgets have compounded.
-              <strong> infralens ✦</strong> provides an early warning radar to anticipate <em>what will slip next</em>.
+              <strong> parakh-ai ✦</strong> provides an early warning radar to anticipate <em>what will slip next</em>.
             </p>
 
             <div style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(0,102,255,0.04)', border: '1px solid rgba(0,102,255,0.15)', borderRadius: 6, fontSize: 13 }}>
@@ -128,7 +128,7 @@ export default function About() {
               with a machine learning <strong>Early Warning System</strong> (probabilistic forecast for the next 30 days).
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: 12, marginTop: 20 }}>
               {[
                 { num: '2,059', label: 'Active Projects' },
                 { num: '7,497', label: 'Project-Months' },
@@ -181,7 +181,7 @@ export default function About() {
               Government infrastructure demands mathematical precision alongside predictive capability.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 18 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 16, marginTop: 18 }}>
               <div style={{ padding: 16, background: 'var(--surface-subtle, #F8FAFC)', border: '1px solid var(--border-color, #E2E8F0)', borderRadius: 6 }}>
                 <span className="sm-confidence-pill">📐 Deterministic Rules Engine</span>
                 <h3 style={{ fontSize: 14, fontWeight: 700, marginTop: 10, marginBottom: 4 }}>Where the Project Stands Today</h3>
@@ -212,7 +212,7 @@ export default function About() {
               As required by SIH Outcome (b), machine learning algorithms are benchmarked against traditional statistical baselines (Logistic Regression).
             </p>
 
-            <div style={{ marginTop: 16, overflowX: 'auto' }}>
+            <div className="sm-table-scroll-wrapper" style={{ marginTop: 16 }}>
               <table className="sm-table">
                 <thead>
                   <tr>
@@ -254,7 +254,7 @@ export default function About() {
               Full compliance across all primary and secondary evaluation deliverables.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 12, marginTop: 16 }}>
               {OUTCOMES.map(({ label, status, note }) => (
                 <div key={label} style={{ display: 'flex', gap: 10, padding: 12, background: 'var(--surface-subtle, #F8FAFC)', border: '1px solid var(--border-color, #E2E8F0)', borderRadius: 6 }}>
                   <span style={{ fontSize: 14 }}>{status}</span>

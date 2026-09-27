@@ -104,14 +104,14 @@ export default function Dashboard() {
             className="sm-page-title"
             style={{
               maxWidth: 780,
-              fontFamily: "var(--font-display, 'Geist', sans-serif)",
-              letterSpacing: '-0.035em',
-              fontWeight: 600,
-              lineHeight: 1.15,
+              fontFamily: "var(--font-geist-sans), 'Geist', sans-serif",
+              letterSpacing: '-0.03em',
+              fontWeight: 500,
+              lineHeight: 1.18,
               color: '#000000',
             }}
           >
-            infralens is building the early warning intelligence radar for India's mega-infrastructure investments.
+            parakh-ai is building the early warning intelligence radar for India's mega-infrastructure investments.
           </h1>
 
           <p
@@ -141,8 +141,15 @@ export default function Dashboard() {
           </div>
 
           {/* Prompt Bar Matching Reference Image */}
-          <div style={{ maxWidth: 440, marginTop: 14 }}>
-            <div className="sm-pinstripe-bar">
+          <div style={{ width: '100%', maxWidth: 440, marginTop: 14 }}>
+            <div
+              className="sm-pinstripe-bar"
+              onClick={() => typeof window !== 'undefined' && window.dispatchEvent(new CustomEvent('open-cmdk'))}
+              style={{ cursor: 'pointer' }}
+              role="button"
+              tabIndex={0}
+              title="Click or press ⌘K to search projects"
+            >
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span>QUERY TELEMETRY RADAR</span>
               </span>
@@ -166,38 +173,29 @@ export default function Dashboard() {
             <span style={{ fontSize: 11, fontFamily: "var(--font-mono, 'Geist Mono', monospace)", color: '#475569', fontWeight: 600 }}>NIC CLOUD</span>
           </div>
 
-          {/* Real Metrics Strip */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 16,
-              marginTop: 28,
-              paddingTop: 20,
-              borderTop: '1px solid rgba(0,0,0,0.06)',
-            }}
-          >
+          {/* Real Metrics Strip (Responsive Grid) */}
+          <div className="sm-hero-metrics-grid">
             <div>
               <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>TRACKED PORTFOLIO</span>
-              <div style={{ fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#0F172A', marginTop: 2 }}>{totalProjects.toLocaleString('en-IN')}</div>
+              <div style={{ fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#0F172A', marginTop: 2 }}>{totalProjects.toLocaleString('en-IN')}</div>
               <span style={{ fontSize: 11, color: '#64748B' }}>Central sector works</span>
             </div>
 
             <div>
               <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>SANCTIONED CAPITAL</span>
-              <div style={{ fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#0F172A', marginTop: 2 }}>₹34.8L Cr</div>
+              <div style={{ fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#0F172A', marginTop: 2 }}>₹34.8L Cr</div>
               <span style={{ fontSize: 11, color: '#64748B' }}>17 Union Ministries</span>
             </div>
 
             <div>
               <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>NET OVERRUN ESCALATION</span>
-              <div style={{ fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#DC2626', marginTop: 2 }}>+₹4.92L Cr</div>
+              <div style={{ fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#DC2626', marginTop: 2 }}>+₹4.92L Cr</div>
               <span style={{ fontSize: 11, color: '#DC2626' }}>+14.4% aggregate drift</span>
             </div>
 
             <div>
               <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>CRITICAL / HIGH FLAGGED</span>
-              <div style={{ fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#EA580C', marginTop: 2 }}>{flaggedCount} Projects</div>
+              <div style={{ fontSize: 'clamp(20px, 3vw, 24px)', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#EA580C', marginTop: 2 }}>{flaggedCount} Projects</div>
               <span style={{ fontSize: 11, color: '#EA580C' }}>{criticalCount} Critical Stoppages</span>
             </div>
           </div>
@@ -226,14 +224,14 @@ export default function Dashboard() {
 
       {/* ── 4. Supermemory Signature #1 Benchmark & Independent Paper (#public-accuracy) */}
       <section id="public-accuracy" className="mb-10">
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
+        <div className="sm-accuracy-grid">
           {/* Left Card: Independent Benchmarks */}
           <BlueprintCard
             title="Independent benchmarks"
             meta="SIH 26103 · BENCHMARK EVALUATION"
           >
             <p style={{ fontSize: '14.5px', lineHeight: 1.6, color: 'var(--ink, #0F172A)', margin: '14px 0' }}>
-              “INFRALENS <strong>performs best overall</strong>, achieving an anomaly detection F1 rate of <strong>94.8%</strong> and an ROC-AUC of <strong>0.886</strong>, capturing contractor and statutory bottlenecks 6 months earlier than standard MoSPI flash declarations.”
+              “PARAKH AI <strong>performs best overall</strong>, achieving an anomaly detection F1 rate of <strong>94.8%</strong> and an ROC-AUC of <strong>0.886</strong>, capturing contractor and statutory bottlenecks 6 months earlier than standard MoSPI flash declarations.”
             </p>
             <Link href="/about" className="sm-chart-caption-link">
               <span>Read the research documentation</span>
@@ -251,7 +249,7 @@ export default function Dashboard() {
         <div className="sm-section-header">
           <h2 className="sm-section-title">Our benchmarks</h2>
           <p className="sm-section-desc">
-            Comparative performance of INFRALENS predictive models against standard MoSPI manual monitoring milestones.
+            Comparative performance of PARAKH AI predictive models against standard MoSPI manual monitoring milestones.
           </p>
         </div>
 
@@ -276,7 +274,7 @@ export default function Dashboard() {
             </div>
 
             {/* Controls: Search & Export */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" style={{ flexWrap: 'wrap' }}>
               <input
                 type="text"
                 placeholder="Search watchlist by project, ministry..."
@@ -288,7 +286,9 @@ export default function Dashboard() {
                   padding: '0 12px',
                   border: '1px solid var(--border-color, #CBD5E1)',
                   borderRadius: 4,
-                  width: 250,
+                  flex: '1 1 180px',
+                  maxWidth: 260,
+                  minWidth: 140,
                   outline: 'none',
                   background: 'var(--card-bg, #FFFFFF)',
                 }}
@@ -296,9 +296,9 @@ export default function Dashboard() {
 
               <button
                 type="button"
-                onClick={() => exportToCsv(alerts, 'infralens-priority-watchlist.csv')}
+                onClick={() => exportToCsv(alerts, 'parakh-ai-priority-watchlist.csv')}
                 className="sm-table-inspect-btn"
-                style={{ height: 34, padding: '0 12px', fontSize: '12px' }}
+                style={{ height: 34, padding: '0 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
                 title="Export filtered priority watchlist as CSV"
               >
                 <Download size={13} />
@@ -308,7 +308,7 @@ export default function Dashboard() {
           </div>
 
           {/* Real Data Table with Zero-Clipping & High Density Layout */}
-          <div style={{ overflowX: 'auto' }}>
+          <div className="sm-table-scroll-wrapper">
             <table className="sm-table">
               <thead>
                 <tr>

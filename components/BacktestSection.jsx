@@ -75,7 +75,7 @@ export default function BacktestSection() {
             </div>
 
             <div>
-              <span className="text-[10px] font-mono text-slate-400 block uppercase tracking-wider">Infralens Early Flag</span>
+              <span className="text-[10px] font-mono text-slate-400 block uppercase tracking-wider">PARAKH AI Early Flag</span>
               <span className="sm-backtest-pill-predicted">
                 {p.predictedBand}
               </span>

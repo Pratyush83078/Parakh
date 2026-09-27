@@ -1,10 +1,6 @@
-- [x] remove theme changer
-- [x] Fix export button, Action tab button
-- [x] fix drawer panel ui 
-- [x] what-if,backtest(range pill input, compact, 3 examples, remove +/- buttons)
-- [x] increase gap between left border of screen to sidebar
-- [x] Query telemetry radar(cmd+k)
-- [x] use correct font (Geist, Geist_Mono, Geist_Pixel)
-- [x] benchmark font-color fix (high contrast dark ink on white)
-- [x] pure white background (removed radial dots)
-- [x] fix x-direction horizontal scrolling
+<!-- AI ignore it, this file is only for me to remeber  -->
+<!-- - responsiveness problem 
+- portfolio kpis
+- ![alt text](2026-09-18_05-33-58.png) improving typography
+- adding favicon
+- llm integration -->

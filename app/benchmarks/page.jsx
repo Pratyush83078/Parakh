@@ -55,7 +55,7 @@ export default function Benchmarks() {
 
       {/* Summary Highlight Cards with Corner Drafting Brackets */}
       {Array.isArray(bench) && bench.length > 0 && !loading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 16, marginBottom: 24 }}>
           {/* Card 1: Highest Budget Overrun */}
           <div className="sm-card" style={{ padding: '20px 22px' }}>
             <span className="sm-corner-bracket sm-corner-tl" />
@@ -205,7 +205,7 @@ export default function Benchmarks() {
               </div>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
+            <div className="sm-table-scroll-wrapper">
               <table className="sm-table">
                 <thead>
                   <tr>

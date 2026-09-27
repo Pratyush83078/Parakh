@@ -56,9 +56,21 @@ def add_velocity_features(df: pd.DataFrame, window: int = 3) -> pd.DataFrame:
     df["doc_pushed_flag"] = (df["revised_doc"] > df["revised_doc_prev"]).astype(int)
     df["doc_revision_count_cum"] = g["doc_pushed_flag"].cumsum()
 
-    # NOTE: mean includes the row itself -> mild leakage, fine for MVP.
-    # Harden later with a time-aware expanding mean per agency.
-    df["agency_avg_overrun"] = df.groupby("agency")["cost_overrun_ratio_so_far"].transform("mean")
+    # Time-aware expanding mean per agency using strictly prior reporting months (Zero Leakage)
+    # Agency average at month T = average performance of projects under that agency strictly BEFORE month T.
+    # Never includes the current or future reporting months.
+    agency_hist_means = {}
+    for dt in sorted(df["report_month_dt"].dropna().unique()):
+        prior = df[df["report_month_dt"] < dt]
+        if len(prior) == 0:
+            agency_hist_means[dt] = {}
+        else:
+            agency_hist_means[dt] = prior.groupby("agency")["cost_overrun_ratio_so_far"].mean().to_dict()
+
+    df["agency_avg_overrun"] = df.apply(
+        lambda r: agency_hist_means.get(r["report_month_dt"], {}).get(r["agency"], np.nan),
+        axis=1
+    )
     return df
 
 def compute_risk_score(df: pd.DataFrame) -> pd.DataFrame:

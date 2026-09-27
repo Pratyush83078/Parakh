@@ -20,7 +20,10 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
-  overflow-x: clip;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 body {
@@ -30,7 +33,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: clip;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 #root {
