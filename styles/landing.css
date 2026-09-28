@@ -263,7 +263,7 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
 @media (max-width: 640px) { .ln-drivers li { grid-template-columns: 130px 1fr 3em; } }
 
 /* Watchlist table */
-.ln-watch-head { display: flex; justify-content: space-between; align-items: end; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.2rem; }
+.ln-watch-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.2rem; }
 .ln-toolbar { display: flex; gap: 0.7rem; align-items: center; }
 .ln-input input {
   font: inherit; font-size: 0.85rem; padding: 0.72em 1.1em; border-radius: 999px;

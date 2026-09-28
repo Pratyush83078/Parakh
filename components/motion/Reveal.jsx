@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
+import { gsap, useGSAP } from '@/lib/gsap';
 
 // Scroll-choreography primitives (GSAP + useGSAP, scoped + auto-cleanup).
 //
@@ -9,25 +9,28 @@ import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 // <SplitWords as="h2"> — word-by-word masked rise for display headings.
 //                        Keeps an unsplit accessible name via aria-label.
 
-export function Reveal({ children, className = '', delay = 0, y = 44, stagger = 0.08, once = true }) {
+export function Reveal({ children, className = '', style, delay = 0, y = 30, stagger = 0.06, once = true }) {
   const ref = useRef(null);
 
   useGSAP(() => {
-    if (prefersReducedMotion()) return;
-    const targets = ref.current.querySelectorAll(':scope > *');
-    gsap.from(targets.length ? targets : ref.current, {
-      y,
-      autoAlpha: 0,
-      duration: 1,
-      delay,
-      stagger,
-      ease: 'power3.out',
-      scrollTrigger: { trigger: ref.current, start: 'top 82%', once },
+    const media = gsap.matchMedia();
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      const targets = ref.current.querySelectorAll(':scope > *');
+      gsap.from(targets.length ? targets : ref.current, {
+        y,
+        opacity: 0,
+        duration: 1,
+        delay,
+        stagger,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: ref.current, start: 'top 82%', once },
+      });
     });
+    return () => media.revert();
   }, { scope: ref });
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={className} style={style}>
       {children}
     </div>
   );
@@ -38,15 +41,18 @@ export function SplitWords({ as: Tag = 'h2', text, className = '', accent = [], 
   const words = text.split(' ');
 
   useGSAP(() => {
-    if (prefersReducedMotion()) return;
-    gsap.from(ref.current.querySelectorAll('.ln-w-inner'), {
-      yPercent: 115,
-      rotate: 2.5,
-      duration: 1.1,
-      stagger: 0.045,
-      ease: 'power4.out',
-      scrollTrigger: { trigger: ref.current, start: 'top 85%', once: true },
+    const media = gsap.matchMedia();
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      gsap.from(ref.current.querySelectorAll('.ln-w-inner'), {
+        yPercent: 115,
+        rotate: 2.5,
+        duration: 1.1,
+        stagger: 0.045,
+        ease: 'power4.out',
+        scrollTrigger: { trigger: ref.current, start: 'top 85%', once: true },
+      });
     });
+    return () => media.revert();
   }, { scope: ref });
 
   return (

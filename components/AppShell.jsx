@@ -1,21 +1,24 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import SupermemorySidebar from '@/components/SupermemorySidebar';
+import { MotionConfig } from 'motion/react';
+import SiteHeader from '@/components/SiteHeader';
 
-// The home route is a full-bleed scroll story with its own header.
-// Every other route keeps the working dashboard shell with the sidebar.
 export default function AppShell({ children }) {
   const pathname = usePathname();
-
-  if (pathname === '/') {
-    return <div className="st-shell">{children}</div>;
-  }
-
   return (
-    <div className="sm-app-container">
-      <SupermemorySidebar />
-      <main className="sm-content-area">{children}</main>
-    </div>
+    <MotionConfig reducedMotion="user">
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <SiteHeader />
+      {pathname === '/' ? children : (
+        <main id="main-content" tabIndex={-1} className="workspace">
+          <div key={pathname} className="workspace-page">{children}</div>
+          <footer className="workspace-footer">
+            <span>Parakh · MoSPI Flash Reports</span>
+            <span>Decision support, not an instruction to intervene.</span>
+          </footer>
+        </main>
+      )}
+    </MotionConfig>
   );
 }

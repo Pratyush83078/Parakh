@@ -1,12 +1,11 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import { useProjectDetails } from '@/hooks/useProjectDetails';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/lib/api';
 import ProjectDrawer from '@/components/ProjectDrawer';
 import SmoothScroll from '@/components/motion/SmoothScroll';
-import Cursor from '@/components/motion/Cursor';
-import LandingNav from '@/components/landing/LandingNav';
 import Hero from '@/components/landing/Hero';
 import Ticker from '@/components/landing/Ticker';
 import Problem from '@/components/landing/Problem';
@@ -25,15 +24,8 @@ export default function Home() {
   const { data: kpis, error: kErr } = useApi(api.kpis);
   const { data: alertsData, loading: aLoading, error: aErr } = useApi(() => api.alerts(50));
 
-  const [selected, setSelected] = useState(null);
-  const [peers, setPeers] = useState(null);
+  const { detail, pending, error: detailError, open: openProject, close } = useProjectDetails();
   const [query, setQuery] = useState('');
-
-  async function openProject(code) {
-    const [proj, peerData] = await Promise.all([api.project(code), api.peers(code).catch(() => null)]);
-    setSelected(proj);
-    setPeers(peerData);
-  }
 
   const flaggedAll = Array.isArray(alertsData) ? alertsData : alertsData?.projects || alertsData?.data || [];
   const flagged = useMemo(() => {
@@ -53,13 +45,11 @@ export default function Home() {
   return (
     <SmoothScroll>
       <div className="ln-page">
-        <Cursor />
         <div className="ln-grain" aria-hidden="true" />
-        <LandingNav />
 
-        <main>
+        <main id="main-content" tabIndex={-1}>
           {/* 1 — Hook: the hero with live proof card */}
-          <Hero kpis={kpis} kErr={kErr} flagged={flaggedAll.slice(0, 5)} onInspect={openProject} />
+          <Hero kpis={kpis} kErr={kErr} flagged={flaggedAll.slice(0, 5)} flaggedLoading={aLoading} flaggedError={aErr} onInspect={openProject} />
 
           {/* 2 — Scale: vital-signs ticker */}
           <Ticker kpis={kpis} />
@@ -77,7 +67,7 @@ export default function Home() {
           <Watchlist
             flagged={flagged} shown={shown} total={flagged.length}
             query={query} setQuery={setQuery}
-            loading={aLoading} error={aErr} onInspect={openProject}
+            loading={aLoading} error={aErr} available={alertsData?.total_alerts} onInspect={openProject}
           />
 
           {/* 7 — The evidence: does ML beat rules? */}
@@ -95,7 +85,8 @@ export default function Home() {
 
         <Footer metrics={metrics} />
 
-        {selected && <ProjectDrawer project={selected} peers={peers} onClose={() => setSelected(null)} />}
+        {(pending || detailError) && <p className="ln-error-notice" role={detailError ? "alert" : "status"}>{detailError || "Opening project record…"}</p>}
+        {detail && <ProjectDrawer {...detail} onClose={close} />}
       </div>
     </SmoothScroll>
   );

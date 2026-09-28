@@ -13,23 +13,23 @@ export const monthLabel = (ym, style = 'long') =>
 const shortMinistry = (m) => (m || '').replace(/^(Ministry|Department) of /, '');
 
 /* ── Proof card: one real flagged project, annotated ─────────────────────── */
-export function HeroSlip({ projects, month, onInspect }) {
+export function HeroSlip({ projects, month, onInspect, loading, error }) {
   const [i, setI] = useState(0);
   const cardRef = useRef(null);
   const p = projects[i];
 
-  const next = () => {
-    const go = () => setI((i + 1) % projects.length);
-    if (prefersReducedMotion() || !cardRef.current) return go();
-    gsap.to(cardRef.current, {
-      y: 14, autoAlpha: 0, duration: 0.28, ease: 'power2.in',
-      onComplete: () => {
-        go();
-        gsap.fromTo(cardRef.current, { y: -14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out' });
-      },
-    });
-  };
+  const { contextSafe } = useGSAP({ scope: cardRef });
+  const next = contextSafe(() => {
+    if (!projects.length) return;
+    setI(index => (index + 1) % projects.length);
+    if (prefersReducedMotion() || !cardRef.current) return;
+    // Keep the card's scroll transform independent of its record-change animation.
+    gsap.fromTo(cardRef.current, { opacity: 0.45 }, { opacity: 1, duration: 0.45, overwrite: 'auto' });
+  });
 
+  if (!p && !loading) {
+    return <aside className="ln-slip"><h2 className="ln-slip-title">{error ? 'Project preview unavailable' : 'No priority records found'}</h2><p className="ln-body">{error ? 'The project snapshot could not load. Try reloading the page.' : 'Browse the full directory to explore the latest snapshot.'}</p><a href="/projects" className="ln-btn ln-btn-ghost">Open project directory</a></aside>;
+  }
   if (!p) {
     return (
       <aside className="ln-slip" aria-busy="true" aria-label="Loading an example project">
@@ -79,7 +79,7 @@ export function HeroSlip({ projects, month, onInspect }) {
 }
 
 /* ── Hero ────────────────────────────────────────────────────────────────── */
-export default function Hero({ kpis, kErr, flagged, onInspect }) {
+export default function Hero({ kpis, kErr, flagged, flaggedLoading, flaggedError, onInspect }) {
   const root = useRef(null);
   const month = kpis?.report_month;
   const overrunPct = kpis
@@ -135,7 +135,7 @@ export default function Hero({ kpis, kErr, flagged, onInspect }) {
             <span className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner ln-accent">slip,</span></span>
             <span className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner">&nbsp;</span></span>
             {'before the report says so.'.split(' ').map((w, i) => (
-              <span key={`b${i}`} className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner">{w}{i < 3 ? '\u00A0' : ''}</span></span>
+              <span key={`b${i}`} className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner">{w}{i < 4 ? '\u00A0' : ''}</span></span>
             ))}
           </h1>
 
@@ -170,7 +170,7 @@ export default function Hero({ kpis, kErr, flagged, onInspect }) {
           </div>
         </div>
 
-        <HeroSlip projects={flagged} month={month} onInspect={onInspect} />
+        <HeroSlip projects={flagged} month={month} onInspect={onInspect} loading={flaggedLoading} error={flaggedError} />
       </div>
 
       <div className="ln-scroll-hint" aria-hidden="true">Scroll</div>

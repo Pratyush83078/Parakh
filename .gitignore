@@ -56,3 +56,8 @@ out/
 frontend/
 backend/
 .freebuff
+
+# Browser verification artifacts
+.next-verify/
+test-results/
+playwright-report/

@@ -15,7 +15,7 @@ function Band({ band, score }) {
   return <span className={`ln-band band-${band}`}>{band}{score != null && <b className="ln-num">{score.toFixed(1)}</b>}</span>;
 }
 
-export default function Watchlist({ flagged, shown, total, query, setQuery, loading, error, onInspect }) {
+export default function Watchlist({ flagged, shown, total, query, setQuery, loading, error, available, onInspect }) {
   const bodyRef = useRef(null);
 
   useGSAP(() => {
@@ -26,7 +26,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
       y: 18, autoAlpha: 0, duration: 0.55, stagger: 0.05, ease: 'power2.out',
       scrollTrigger: { trigger: bodyRef.current, start: 'top 88%', once: true },
     });
-  }, { scope: bodyRef, dependencies: [shown.length] });
+  }, { scope: bodyRef, dependencies: [shown], revertOnUpdate: true });
 
   return (
     <section id="watchlist" className="ln-section">
@@ -107,7 +107,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
           </div>
         </Reveal>
         <div className="ln-table-foot">
-          <span>Showing <b className="ln-num">{shown.length}</b> of <b className="ln-num">{nf.format(total)}</b> flagged projects</span>
+          <span>Showing <b className="ln-num">{shown.length}</b> of <b className="ln-num">{nf.format(total)}</b> {query ? "matching loaded" : "loaded priority"} records{available != null && ` · ${nf.format(available)} priority records in the full report`}</span>
           <Link href="/projects">Browse all projects <ArrowUpRight size={14} /></Link>
         </div>
       </div>
