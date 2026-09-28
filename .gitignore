@@ -55,9 +55,50 @@ node_modules/
 out/
 frontend/
 backend/
-.freebuff
+.freebuff/
+.temp-inspo
 
 # Browser verification artifacts
 .next-verify/
 test-results/
 playwright-report/
+
+# ── Python ML artefacts ──────────────────────────────────────────────────────
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+models/
+# mlruns/
+# .mlflow/
+# wandb/
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# Python dist / build
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
+# ── Next.js / Vercel ─────────────────────────────────────────────────────────
+.vercel/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Misc project-specific scratch ────────────────────────────────────────────
+# (these live outside the repo now; ignore if accidentally copied back)
+fix.md
+kimi.md
+image.png
+skills-lock.json
+.tmp-inspo
