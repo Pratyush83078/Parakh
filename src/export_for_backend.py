@@ -7,7 +7,10 @@ from pathlib import Path
 def export_latest_snapshot():
     df = pd.read_parquet("data/processed/full_panel.parquet")
     df = df.replace([np.inf, -np.inf], np.nan)
-    latest = df.sort_values("report_month_dt").groupby("project_code").tail(1).copy()
+    # Only projects present in the latest report. Projects that dropped out earlier
+    # (completed or removed) must not inflate the live portfolio totals.
+    latest_month = df["report_month_dt"].max()
+    latest = df[df["report_month_dt"] == latest_month].copy()
 
     # Core metadata & monitoring metrics
     base_cols = [
@@ -37,7 +40,14 @@ def export_latest_snapshot():
 
     # Generate high-level KPI summary for dashboard overview
     kpi_summary = {
+        "report_month": str(latest_month)[:7],
         "total_projects": int(len(export)),
+        "projects_left_since_first_report": int(df["project_code"].nunique() - len(export)),
+        "unique_projects_all_reports": int(df["project_code"].nunique()),
+        "panel_rows": int(len(df)),
+        "projects_per_month": {
+            str(m)[:7]: int(n) for m, n in df.groupby("report_month_dt")["project_code"].nunique().sort_index().items()
+        },
         "total_original_cost_cr": round(float(export["original_cost_cr"].sum()), 2),
         "total_revised_cost_cr": round(float(export["revised_cost_cr"].sum()), 2),
         "total_expenditure_cr": round(float(export["cumulative_expenditure_cr"].sum()), 2),

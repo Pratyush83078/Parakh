@@ -126,6 +126,20 @@ def step3_train_models(df):
     sched_res = train_and_compare(df, "schedule_slipped_label")
 
     print(f"\nModel training completed in {time.time() - t0:.1f}s")
+
+    # Single source of truth for every accuracy number shown in the UI and docs.
+    months = sorted(df["report_month_dt"].dropna().dt.strftime("%Y-%m").unique())
+    metrics = {
+        "generated_by": "src/run_all.py step 3",
+        "months": months,
+        "horizon": "next monthly report",
+        "cost_revised_up_label": cost_res,
+        "schedule_slipped_label": sched_res,
+    }
+    import json
+    with open(PROCESSED_DIR / "model_metrics.json", "w") as f:
+        json.dump(metrics, f, indent=2)
+    print("Wrote data/processed/model_metrics.json")
     return cost_res, sched_res
 
 

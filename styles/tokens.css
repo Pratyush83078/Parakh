@@ -53,6 +53,8 @@
   --font-mono:          var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace;
   --font-pixel:         var(--font-geist-pixel), 'Geist Pixel', monospace;
   --font-hand:          'Caveat', cursive;
+  --font-anek:          'Anek Latin', var(--font-display);
+  --font-tiro:          'Tiro Devanagari Hindi', 'Noto Sans Devanagari', serif;
 
   /* Transitions */
   --transition-fast:    0.12s ease-in-out;

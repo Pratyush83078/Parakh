@@ -13,12 +13,8 @@ const primaryLinks = [
 
 const pageAnchors = [
   { id: 'overview', label: 'Overview' },
-  { id: 'kpis', label: 'Portfolio KPIs' },
   { id: 'watchlist', label: 'Priority Watchlist' },
-  { id: 'simulator', label: 'What-If Simulator' },
-  { id: 'backtest', label: 'Validated Backtest' },
-  { id: 'benchmarks', label: 'Benchmarking Radar' },
-  { id: 'deployment', label: 'Deployment Specs' },
+  { id: 'models', label: 'Model Evaluation' },
 ];
 
 export default function SupermemorySidebar() {
@@ -34,7 +30,10 @@ export default function SupermemorySidebar() {
             <span className="sm-brand-icon">
               <Sparkles size={18} strokeWidth={2.4} />
             </span>
-            <span className="sm-brand-text">parakh-ai</span>
+            <span className="sm-brand-text">
+              <span lang="hi" style={{ fontFamily: 'var(--font-tiro, serif)', color: '#0284C7', marginRight: 4, fontWeight: 700 }}>परख</span>
+              Parakh
+            </span>
           </Link>
 
           {/* Cmd+K Search Trigger */}

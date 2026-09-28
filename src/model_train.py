@@ -62,7 +62,16 @@ def train_and_compare(df, target):
         ),
     ]
 
-    results = {"group_split": {}, "temporal_split": {}}
+    results = {
+        "group_split": {
+            "n_test_projects": len(test_projects),
+            "n_test_rows": int(len(X_test)),
+            "n_test_positives": int(y_test.sum()),
+        },
+        "temporal_split": {},
+        # Conventional baseline for PS dimension (b): the transparent rule score, no training.
+        "rule_score_roc_auc": round(roc_auc_score(y, data["risk_score"]), 3),
+    }
     for name, model in models:
         model.fit(X_train, y_train)
         proba = model.predict_proba(X_test)[:, 1]
@@ -89,6 +98,7 @@ def train_and_compare(df, target):
         X_t_test, y_t_test = data.loc[t_test_mask, FEATURES], data.loc[t_test_mask, target].astype(int)
 
         if y_t_train.sum() > 0 and y_t_test.sum() > 0:
+            results["temporal_split"]["test_month"] = str(latest_month)[:7]
             print(f"\n[TEMPORAL SPLIT] Train: < {str(latest_month)[:10]} | Test: {str(latest_month)[:10]}")
             for name, model in models:
                 model.fit(X_t_train, y_t_train)

@@ -10,8 +10,9 @@
   background-color: #FFFFFF;
   color: var(--ink, #0F172A);
   font-family: var(--font-geist-sans), var(--font-body, 'Geist', sans-serif);
-  padding-left: calc(clamp(32px, 5vw, 84px) + 236px + clamp(24px, 3.5vw, 48px));
-  padding-right: clamp(24px, 4vw, 56px);
+  /* sidebar offset + sidebar width + breathing room between sidebar rule and content */
+  padding-left: calc(clamp(32px, 5vw, 84px) + 236px + clamp(40px, 5vw, 80px));
+  padding-right: clamp(32px, 5vw, 80px);
   width: 100%;
   box-sizing: border-box;
 }
@@ -288,8 +289,8 @@
   flex: 1 1 0%;
   width: 100%;
   min-width: 0;
-  padding: 36px 0 80px;
-  max-width: 1160px;
+  padding: 48px 0 96px;
+  max-width: 1120px;
   box-sizing: border-box;
 }
 

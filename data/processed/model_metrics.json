@@ -1,0 +1,64 @@
+{
+  "generated_by": "src/run_all.py step 3",
+  "months": [
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07"
+  ],
+  "horizon": "next monthly report",
+  "cost_revised_up_label": {
+    "group_split": {
+      "n_test_projects": 402,
+      "n_test_rows": 1122,
+      "n_test_positives": 20,
+      "logistic_regression": {
+        "roc_auc": 0.798,
+        "pr_auc": 0.077
+      },
+      "gradient_boosting": {
+        "roc_auc": 0.88,
+        "pr_auc": 0.161
+      }
+    },
+    "temporal_split": {
+      "test_month": "2026-06",
+      "logistic_regression": {
+        "roc_auc": 0.503,
+        "pr_auc": 0.044
+      },
+      "gradient_boosting": {
+        "roc_auc": 0.436,
+        "pr_auc": 0.039
+      }
+    },
+    "rule_score_roc_auc": 0.609
+  },
+  "schedule_slipped_label": {
+    "group_split": {
+      "n_test_projects": 402,
+      "n_test_rows": 1120,
+      "n_test_positives": 198,
+      "logistic_regression": {
+        "roc_auc": 0.799,
+        "pr_auc": 0.399
+      },
+      "gradient_boosting": {
+        "roc_auc": 0.842,
+        "pr_auc": 0.55
+      }
+    },
+    "temporal_split": {
+      "test_month": "2026-06",
+      "logistic_regression": {
+        "roc_auc": 0.728,
+        "pr_auc": 0.28
+      },
+      "gradient_boosting": {
+        "roc_auc": 0.767,
+        "pr_auc": 0.342
+      }
+    },
+    "rule_score_roc_auc": 0.574
+  }
+}
