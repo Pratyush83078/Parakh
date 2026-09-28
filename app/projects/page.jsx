@@ -8,7 +8,7 @@ import { useProjectDetails } from '@/hooks/useProjectDetails';
 import { api, cleanState, fmtCr, fmtPct } from '@/lib/api';
 import { exportToCsv } from '@/lib/intelligence';
 import PageIntro from '@/components/PageIntro';
-import ProjectDrawer from '@/components/ProjectDrawer';
+import ProjectDossier from '@/components/ProjectDossier';
 
 const COLUMNS = [
   ['Project / agency', null], ['State / ministry', null], ['Rule score', 'risk_score'],
@@ -138,7 +138,7 @@ function ProjectsContent() {
           <button className="icon-button" aria-label="Next page" disabled={loading || !!error || page >= pages} onClick={() => navigate({ page: page + 1 })}><ChevronRight size={18} /></button></div>
       </div>
       <p className="workspace-note">Rule bands describe the latest report. Open a record for experimental model estimates and their limitations. CSV exports contain only the displayed page.</p>
-      {details.detail && <ProjectDrawer {...details.detail} onClose={() => navigate({ project: null })} />}
+      {details.detail && <ProjectDossier key={details.detail.project.project_code} {...details.detail} onClose={() => navigate({ project: null })} onOpenPeer={open} returnLabel="Back to directory" />}
     </>
   );
 }

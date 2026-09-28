@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
+import CountUp from '@/components/motion/CountUp';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
 import { monthLabel } from './Hero';
 
@@ -18,9 +19,10 @@ export default function Portfolio({ kpis }) {
 
   useGSAP(() => {
     if (prefersReducedMotion() || !kpis) return;
+    // The band strip grows with your scroll — scrubbed, so it answers the hand.
     gsap.from(ref.current.querySelectorAll('.ln-bands-bar span'), {
-      scaleX: 0, duration: 1.2, stagger: 0.08, ease: 'power4.inOut',
-      scrollTrigger: { trigger: ref.current, start: 'top 75%', once: true },
+      scaleX: 0, stagger: 0.08, ease: 'none',
+      scrollTrigger: { trigger: ref.current.querySelector('.ln-bands'), start: 'top 92%', end: 'top 45%', scrub: 0.5 },
     });
     gsap.from(ref.current.querySelectorAll('.ln-driver-track span'), {
       scaleX: 0, duration: 1.1, stagger: 0.09, ease: 'power4.out',
@@ -55,7 +57,7 @@ export default function Portfolio({ kpis }) {
                 <li key={b}>
                   <span className={`ln-key-sq band-bg-${b}`} aria-hidden="true" />
                   <span>{b}</span>
-                  <b className="ln-num">{kpis ? nf.format(bands[b] || 0) : '—'}</b>
+                  <b className="ln-num"><CountUp value={bands[b] || 0} /></b>
                 </li>
               ))}
             </ul>

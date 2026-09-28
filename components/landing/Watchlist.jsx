@@ -87,7 +87,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
                     return (
                       <tr key={p.project_code}>
                         <td>
-                          <button type="button" className="ln-row-link" onClick={() => onInspect(p.project_code)} data-cursor>
+                          <button type="button" className="ln-row-link" onClick={() => onInspect(p.project_code)} data-cursor="View">
                             <span className="ln-row-name">{p.project_name}</span>
                             <span className="ln-row-meta"><span className="ln-num">#{p.project_code}</span> · {shortMinistry(p.ministry)}</span>
                           </button>

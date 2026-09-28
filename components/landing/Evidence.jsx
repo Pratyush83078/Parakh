@@ -1,5 +1,8 @@
 'use client';
 
+import { useRef } from 'react';
+import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
+import AuroraField from '@/components/motion/AuroraField';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
 import CoinFlipScale from '@/components/story/CoinFlipScale';
 import { monthLabel } from './Hero';
@@ -7,8 +10,8 @@ import { monthLabel } from './Hero';
 const nf = new Intl.NumberFormat('en-IN');
 
 const TASKS = [
-  { key: 'schedule_slipped_label', name: 'Schedule slip', what: 'the completion date moves in the next report' },
-  { key: 'cost_revised_up_label', name: 'Cost revision', what: 'the revised cost goes up in the next report' },
+  { key: 'schedule_slipped_label', name: 'Schedule slip', what: 'the completion date move in the next report' },
+  { key: 'cost_revised_up_label', name: 'Cost revision', what: 'the revised cost go up in the next report' },
 ];
 
 function verdictFor(m) {
@@ -20,6 +23,37 @@ function verdictFor(m) {
 }
 
 export default function Evidence({ metrics }) {
+  const root = useRef(null);
+  const spot = useRef(null);
+
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    // The dark room settles in like a card laid on the desk: slightly small
+    // and rounded while entering, flush and square once you are inside it.
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      gsap.fromTo(root.current,
+        { scale: 0.955, borderRadius: '2.5rem' },
+        {
+          scale: 1, borderRadius: '0rem', ease: 'none',
+          scrollTrigger: { trigger: root.current, start: 'top 96%', end: 'top 30%', scrub: true },
+        });
+    });
+    // A quiet torch of blue light follows the pointer across the dark.
+    mm.add('(prefers-reduced-motion: no-preference) and (pointer: fine)', () => {
+      gsap.set(spot.current, { xPercent: -50, yPercent: -50 });
+      const xTo = gsap.quickTo(spot.current, 'x', { duration: 0.8, ease: 'power3.out' });
+      const yTo = gsap.quickTo(spot.current, 'y', { duration: 0.8, ease: 'power3.out' });
+      const move = (e) => {
+        const r = root.current.getBoundingClientRect();
+        xTo(e.clientX - r.left);
+        yTo(e.clientY - r.top);
+      };
+      root.current.addEventListener('mousemove', move, { passive: true });
+      return () => root.current.removeEventListener('mousemove', move);
+    });
+    return () => mm.revert();
+  }, { scope: root });
+
   const scaleRows = TASKS.map(({ key, name, what }) => {
     const m = metrics[key];
     const v = verdictFor(m);
@@ -39,11 +73,11 @@ export default function Evidence({ metrics }) {
   const costM = metrics.cost_revised_up_label;
 
   return (
-    <section id="evidence" className="ln-section ln-evidence">
-      <div className="ln-orbs" aria-hidden="true">
-        <div className="ln-orb ln-orb-blue" style={{ top: '-10vw', left: '-8vw', right: 'auto' }} />
-        <div className="ln-orb ln-orb-leaf" style={{ bottom: '-10vh', right: '-6vw' }} />
+    <section id="evidence" ref={root} className="ln-section ln-evidence">
+      <div className="ln-aurora ln-aurora-dark" aria-hidden="true">
+        <AuroraField palette="dark" />
       </div>
+      <div ref={spot} className="ln-spot" aria-hidden="true" />
       <div className="ln-grain-dark" aria-hidden="true" />
 
       <div className="ln-wrap" style={{ position: 'relative', zIndex: 2 }}>

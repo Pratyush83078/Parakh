@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
+import CountUp from '@/components/motion/CountUp';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
 import { monthLabel } from './Hero';
 
@@ -14,13 +15,14 @@ export default function Problem({ kpis, months }) {
 
   useGSAP(() => {
     if (prefersReducedMotion()) return;
+    // History rises as you arrive, under your hand — scrubbed, not played.
     gsap.from(barsRef.current.querySelectorAll('.ln-month-bar'), {
-      scaleY: 0, duration: 1.1, stagger: 0.12, ease: 'power4.out',
-      scrollTrigger: { trigger: barsRef.current, start: 'top 78%', once: true },
+      scaleY: 0, stagger: 0.12, ease: 'none',
+      scrollTrigger: { trigger: barsRef.current, start: 'top 88%', end: 'top 45%', scrub: 0.5 },
     });
-    gsap.from(barsRef.current.querySelectorAll('.ln-month b'), {
-      autoAlpha: 0, y: 10, duration: 0.7, stagger: 0.12, delay: 0.35,
-      scrollTrigger: { trigger: barsRef.current, start: 'top 78%', once: true },
+    gsap.from(barsRef.current.querySelectorAll('.ln-month span:last-child'), {
+      autoAlpha: 0, y: 10, duration: 0.7, stagger: 0.12,
+      scrollTrigger: { trigger: barsRef.current, start: 'top 70%', once: true },
     });
   }, { scope: barsRef });
 
@@ -53,7 +55,7 @@ export default function Problem({ kpis, months }) {
                 ))
               : perMonth.map(([m, n]) => (
                   <div key={m} className="ln-month">
-                    <b className="ln-num">{nf.format(n)}</b>
+                    <b className="ln-num"><CountUp value={n} /></b>
                     <span className="ln-month-bar" style={{ height: `${(n / perMonthMax) * 100}%` }} />
                     <span>{monthLabel(m, 'short')}</span>
                   </div>

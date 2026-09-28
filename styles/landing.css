@@ -37,7 +37,20 @@
 body.ln-has-cursor, body.ln-has-cursor a, body.ln-has-cursor button,
 body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
 
-/* ── Grain + orbs ────────────────────────────────────────────────────────── */
+/* ── Aurora gradient field + grain ────────────────────────────────────────── */
+/* The living gradient: a quarter-res canvas of drifting color blobs, blown up
+   and blurred into an aurora (see components/motion/AuroraField.jsx). */
+.ln-aurora { position: absolute; inset: -14% 0; z-index: 0; pointer-events: none;
+  filter: blur(72px) saturate(1.15); transform: translateZ(0); will-change: transform; }
+.ln-aurora canvas { width: 100%; height: 100%; display: block; }
+.ln-aurora-dark { inset: 0; opacity: 0.6; filter: blur(84px) saturate(1.2); }
+
+/* Evidence torch: a soft blue pool that trails the pointer (JS positions it). */
+.ln-spot { position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;
+  width: 44vw; height: 44vw; border-radius: 50%;
+  background: radial-gradient(circle, rgba(72, 94, 255, 0.16), rgba(72, 94, 255, 0.05) 45%, transparent 70%);
+  mix-blend-mode: screen; }
+
 .ln-grain {
   position: fixed; inset: -50%; z-index: 2147483000; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -51,14 +64,10 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
   100% { transform: translate(0, 0); }
 }
 
-.ln-orbs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.ln-orb { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
-.ln-orb-blue { width: 44vw; height: 44vw; top: -14vw; right: -10vw;
-  background: radial-gradient(circle at 35% 35%, rgba(35, 55, 224, 0.32), rgba(35, 55, 224, 0) 68%); }
-.ln-orb-saffron { width: 34vw; height: 34vw; top: 22vh; left: -12vw;
-  background: radial-gradient(circle at 50% 50%, rgba(232, 163, 61, 0.4), rgba(232, 163, 61, 0) 66%); }
-.ln-orb-leaf { width: 26vw; height: 26vw; bottom: -8vh; right: 16vw;
-  background: radial-gradient(circle at 50% 50%, rgba(44, 140, 102, 0.3), rgba(44, 140, 102, 0) 66%); }
+/* ── Reading progress rail ────────────────────────────────────────────────── */
+.ln-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 980;
+  background: linear-gradient(90deg, var(--ln-blue), rgba(35, 55, 224, 0.55));
+  transform-origin: left; transform: scaleX(0); pointer-events: none; }
 
 /* ── Custom cursor ───────────────────────────────────────────────────────── */
 .ln-cursor-dot, .ln-cursor-ring {
@@ -67,6 +76,11 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
 }
 .ln-cursor-dot { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: #fff; }
 .ln-cursor-ring { width: 34px; height: 34px; margin: -17px 0 0 -17px; border: 1.5px solid #fff; }
+/* Label state: ring becomes a solid pill that names the action ("View"…). */
+.ln-cursor-ring.is-label { border-color: transparent; mix-blend-mode: normal;
+  background: var(--ln-blue); display: grid; place-items: center; }
+.ln-cursor-text { font-family: var(--font-mono); font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: #fff; }
 @media (pointer: coarse) { .ln-cursor-dot, .ln-cursor-ring { display: none; } }
 
 /* ── Type primitives ─────────────────────────────────────────────────────── */
@@ -102,10 +116,21 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
   display: inline-flex; align-items: center; gap: 0.55em;
   font-size: 0.86rem; font-weight: 560; letter-spacing: 0.01em;
   padding: 0.9em 1.6em; border-radius: 999px; border: 1px solid transparent;
-  text-decoration: none; transition: transform 0.35s var(--ln-ease-out), background 0.3s, color 0.3s, border-color 0.3s;
+  text-decoration: none; position: relative; overflow: hidden; isolation: isolate;
+  transition: transform 0.35s var(--ln-ease-out), background 0.3s, color 0.3s, border-color 0.3s;
   will-change: transform;
 }
-.ln-btn:hover { transform: translateY(-2px); }
+/* A beam of light sweeps across on hover — the cheapest possible delight. */
+.ln-btn::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -70%; width: 44%;
+  transform: skewX(-22deg); pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  transition: left 0.65s var(--ln-ease-out);
+}
+.ln-btn-ghost::after { background: linear-gradient(90deg, transparent, rgba(35, 55, 224, 0.14), transparent); }
+.ln-btn:hover::after { left: 128%; }
+.ln-btn svg { transition: transform 0.35s var(--ln-ease-out); }
+.ln-btn:hover svg { transform: translateX(3px); }
 .ln-btn:active { transform: translateY(0) scale(0.98); }
 .ln-btn-ink { background: var(--ln-ink); color: var(--ln-paper); }
 .ln-btn-ink:hover { background: var(--ln-blue); color: #fff; }
@@ -161,7 +186,10 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
 @keyframes ln-drop { 0% { transform: scaleY(0); transform-origin: top; } 45% { transform: scaleY(1); transform-origin: top; } 55% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 @media (max-width: 960px) { .ln-hero-grid { grid-template-columns: 1fr; } .ln-hero { min-height: 0; } }
 
-/* Proof card (one real flagged project) */
+/* Proof card (one real flagged project) — scrub wrapper vs. live card:
+   .ln-slip-scrub carries the scroll transforms, .ln-slip the idle float +
+   pointer tilt, so the two motion systems never fight over one property. */
+.ln-slip-scrub { will-change: transform; }
 .ln-slip {
   background: var(--ln-card); border: 1px solid var(--ln-hairline); border-radius: 14px;
   padding: 1.6rem 1.7rem 1.4rem; box-shadow: 0 24px 60px -28px rgba(25, 25, 20, 0.35), 0 2px 0 rgba(25, 25, 20, 0.04);
@@ -221,7 +249,8 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
 .ln-month { display: grid; gap: 0.5rem; justify-items: center; align-content: end; height: 100%; font-size: 0.72rem; color: var(--ln-ink-60); }
 .ln-month b { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 620; color: var(--ln-ink); }
 .ln-month-bar { width: 100%; max-width: 54px; background: linear-gradient(180deg, var(--ln-blue), rgba(35,55,224,0.55)); border-radius: 5px 5px 2px 2px; transform-origin: bottom; }
-.ln-month:last-child .ln-month-bar { background: linear-gradient(180deg, #cd4239, rgba(205,66,57,0.6)); }
+.ln-month:last-child .ln-month-bar { background: linear-gradient(180deg, #cd4239, rgba(205,66,57,0.6)); animation: ln-risk-pulse 2.4s ease-in-out infinite; }
+@keyframes ln-risk-pulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.22); } }
 .ln-months figcaption { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px dashed var(--ln-hairline); font-size: 0.8rem; color: var(--ln-ink-60); }
 .ln-months figcaption b { color: #b3342c; }
 
@@ -297,8 +326,6 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
 .ln-evidence .ln-body, .ln-evidence .ln-lead { color: rgba(239, 236, 226, 0.62); }
 .ln-evidence .ln-eyebrow { color: rgba(239, 236, 226, 0.5); }
 .ln-evidence .ln-eyebrow::after { background: rgba(239, 236, 226, 0.2); }
-.ln-evidence .ln-orb-blue { background: radial-gradient(circle at 40% 40%, rgba(64, 86, 255, 0.4), transparent 66%); }
-.ln-evidence .ln-orb-leaf { background: radial-gradient(circle at 50% 50%, rgba(44, 140, 102, 0.35), transparent 66%); }
 .ln-evidence .ln-grain-dark { position: absolute; inset: 0; pointer-events: none; opacity: 0.09; mix-blend-mode: screen;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .ln-evidence .ln-table-wrap { background: var(--ln-dark-2); border-color: rgba(239, 236, 226, 0.14); }
@@ -348,11 +375,20 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
 .ln-code::before { content: '● ● ●'; position: absolute; top: 0.9rem; left: 1.2rem; font-size: 0.55rem; letter-spacing: 0.35em; color: rgba(239, 236, 226, 0.3); }
 .ln-code code { display: block; padding-top: 1.1rem; }
 .ln-code .ln-cmd::before { content: '$ '; color: #8fa0ff; }
+/* Typewriter: blinking block caret rides the line being typed. */
+.ln-cmd.is-active::after { content: ''; display: inline-block; width: 0.55em; height: 1em;
+  margin-left: 0.12em; vertical-align: -0.12em; background: #8fa0ff;
+  animation: ln-caret 0.8s steps(2) infinite; }
+@keyframes ln-caret { 50% { opacity: 0; } }
 
 /* Footer */
 .ln-footer { border-top: 1px solid var(--ln-hairline); padding: 4.5rem 0 2.4rem; background: var(--ln-paper-2); position: relative; overflow: hidden; }
-.ln-footer-word { font-family: var(--ln-serif); font-size: clamp(4rem, 13vw, 12rem); font-weight: 500; line-height: 0.95; letter-spacing: -0.03em; color: var(--ln-ink); margin: 0 0 3rem; user-select: none; }
+.ln-footer-word { font-family: var(--ln-serif); font-size: clamp(4rem, 13vw, 12rem); font-weight: 500; line-height: 0.95; letter-spacing: -0.03em; color: var(--ln-ink); margin: 0 0 3rem; user-select: none; display: flex; align-items: baseline; gap: 0.22em; flex-wrap: wrap; }
 .ln-footer-word .ln-deva { font-family: var(--font-tiro); font-weight: 400; }
+.ln-f-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+.ln-f-inner { display: inline-block; will-change: transform; transition: transform 0.4s var(--ln-ease-out); transition-delay: calc(var(--i, 0) * 28ms); }
+.ln-footer-word:hover .ln-f-inner { transform: translateY(-0.05em); }
+.ln-f-mask[lang] .ln-f-inner, .ln-f-inner.ln-deva { transition-delay: 0s; }
 .ln-footer-row { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ln-ink-35); border-top: 1px solid var(--ln-hairline); padding-top: 1.4rem; }
 .ln-footer-row a { color: var(--ln-ink-60); text-decoration: none; }
 .ln-footer-row a:hover { color: var(--ln-blue); }
@@ -365,4 +401,6 @@ body.ln-has-cursor input, body.ln-has-cursor summary { cursor: none; }
   .ln-grain { animation: none; }
   .ln-scroll-hint::after { animation: none; }
   .ln-skel { animation: none; }
+  .ln-month:last-child .ln-month-bar { animation: none; }
+  .ln-f-inner { transition: none; }
 }

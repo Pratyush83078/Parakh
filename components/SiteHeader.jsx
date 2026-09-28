@@ -13,12 +13,27 @@ const links = [
 export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const menuButton = useRef(null);
   const reduced = useReducedMotion();
   useEffect(() => { setOpen(false); }, [pathname]);
 
+  // Tuck the header away while reading down; bring it back on the first
+  // upward intent. Skipped under reduced motion (no transform jump).
+  useEffect(() => {
+    if (reduced) return undefined;
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setHidden(y > last && y > 480);
+      last = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [reduced]);
+
   return (
-    <header className="site-header" onKeyDown={e => {
+    <header className={`site-header ${hidden ? 'is-hidden' : ''}`} onKeyDown={e => {
       if (e.key === 'Escape' && open) { setOpen(false); menuButton.current?.focus(); }
     }}>
       <div className="site-header-inner">

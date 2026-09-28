@@ -4,8 +4,10 @@ import { useMemo, useState, useEffect } from 'react';
 import { useProjectDetails } from '@/hooks/useProjectDetails';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/lib/api';
-import ProjectDrawer from '@/components/ProjectDrawer';
+import ProjectDossier from '@/components/ProjectDossier';
 import SmoothScroll from '@/components/motion/SmoothScroll';
+import Cursor from '@/components/motion/Cursor';
+import ProgressRail from '@/components/motion/ProgressRail';
 import Hero from '@/components/landing/Hero';
 import Ticker from '@/components/landing/Ticker';
 import Problem from '@/components/landing/Problem';
@@ -46,6 +48,8 @@ export default function Home() {
     <SmoothScroll>
       <div className="ln-page">
         <div className="ln-grain" aria-hidden="true" />
+        <ProgressRail />
+        <Cursor />
 
         <main id="main-content" tabIndex={-1}>
           {/* 1 — Hook: the hero with live proof card */}
@@ -86,7 +90,15 @@ export default function Home() {
         <Footer metrics={metrics} />
 
         {(pending || detailError) && <p className="ln-error-notice" role={detailError ? "alert" : "status"}>{detailError || "Opening project record…"}</p>}
-        {detail && <ProjectDrawer {...detail} onClose={close} />}
+        {detail && (
+          <ProjectDossier
+            key={detail.project.project_code}
+            {...detail}
+            onClose={close}
+            onOpenPeer={openProject}
+            returnLabel="Back to the page"
+          />
+        )}
       </div>
     </SmoothScroll>
   );

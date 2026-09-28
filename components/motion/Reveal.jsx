@@ -59,10 +59,13 @@ export function SplitWords({ as: Tag = 'h2', text, className = '', accent = [], 
     <Tag ref={ref} className={`${className} ln-split`} aria-label={text}>
       {words.map((w, i) => (
         <span key={i} className="ln-w-mask" aria-hidden="true">
+          {/* The word break lives INSIDE the inner span as a no-break space:
+              a plain trailing space inside an overflow-hidden inline-block is
+              collapsed by line layout, which jammed headings together. */}
           <span className={`ln-w-inner ${accent.includes(w.replace(/[.,;—]/g, '')) ? accentClass : ''}`}>
             {w}
+            {i < words.length - 1 ? '\u00A0' : ''}
           </span>
-          {i < words.length - 1 ? ' ' : ''}
         </span>
       ))}
     </Tag>

@@ -9,18 +9,33 @@ export default function Footer({ metrics }) {
   const wordRef = useRef(null);
 
   useGSAP(() => {
-    if (prefersReducedMotion()) return;
-    gsap.from(wordRef.current, {
-      yPercent: 40, autoAlpha: 0, duration: 1.4, ease: 'power4.out',
-      scrollTrigger: { trigger: wordRef.current, start: 'top 92%', once: true },
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      // Each letter of the wordmark rises out of its own mask on arrival…
+      gsap.from(wordRef.current.querySelectorAll('.ln-f-inner'), {
+        yPercent: 112, rotate: 6, duration: 1.15, stagger: 0.05, ease: 'power4.out',
+        scrollTrigger: { trigger: wordRef.current, start: 'top 94%', once: true },
+      });
+      // …and the whole line drifts up a little slower than the page (parallax).
+      gsap.fromTo(wordRef.current, { yPercent: 18 }, {
+        yPercent: 0, ease: 'none',
+        scrollTrigger: { trigger: wordRef.current, start: 'top bottom', end: 'bottom bottom', scrub: true },
+      });
     });
+    return () => mm.revert();
   }, { scope: wordRef });
 
   return (
     <footer className="ln-footer">
       <div className="ln-wrap">
         <p ref={wordRef} className="ln-footer-word" aria-label="Parakh">
-          <span className="ln-deva" lang="hi">परख</span> Parakh<span style={{ color: 'var(--ln-blue)' }}>.</span>
+          <span className="ln-f-mask"><span className="ln-f-inner ln-deva" lang="hi">परख</span></span>
+          {' '}
+          {'Parakh.'.split('').map((c, i) => (
+            <span key={i} className="ln-f-mask" aria-hidden="true">
+              <span className="ln-f-inner" style={{ '--i': i }}>{c}</span>
+            </span>
+          ))}
         </p>
         <div className="ln-footer-row">
           <span>Parakh · SIH 26103 · Early warning for central infrastructure</span>
