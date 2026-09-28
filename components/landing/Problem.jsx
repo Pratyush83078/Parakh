@@ -11,11 +11,20 @@ const nf = new Intl.NumberFormat('en-IN');
 export default function Problem({ kpis, months }) {
   const barsRef = useRef(null);
   const perMonth = Object.entries(kpis?.projects_per_month || {});
-  const perMonthMax = Math.max(1, ...perMonth.map(([, n]) => n));
+  // Normalise against a baseline BELOW the minimum so the month-over-month
+  // decline is visible, not four equal towers (values are labelled, and the
+  // figcaption says the bars are scaled — truncation stays honest).
+  const vals = perMonth.map(([, n]) => n);
+  const vMin = Math.min(...vals, Infinity);
+  const vMax = Math.max(1, ...vals);
+  const vBase = vMin - (vMax - vMin) * 0.4;
+  const heightPct = (n) => 8 + ((n - vBase) / (vMax - vBase)) * 88;
+  const leaked = kpis?.projects_left_since_first_report;
 
   useGSAP(() => {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || !perMonth.length) return;
     // History rises as you arrive, under your hand — scrubbed, not played.
+    // dependencies [kpis]: the bars only exist after the snapshot lands.
     gsap.from(barsRef.current.querySelectorAll('.ln-month-bar'), {
       scaleY: 0, stagger: 0.12, ease: 'none',
       scrollTrigger: { trigger: barsRef.current, start: 'top 88%', end: 'top 45%', scrub: 0.5 },
@@ -24,7 +33,11 @@ export default function Problem({ kpis, months }) {
       autoAlpha: 0, y: 10, duration: 0.7, stagger: 0.12,
       scrollTrigger: { trigger: barsRef.current, start: 'top 70%', once: true },
     });
-  }, { scope: barsRef });
+    gsap.from(barsRef.current.querySelector('.ln-leak-chip'), {
+      autoAlpha: 0, scale: 0.85, duration: 0.7, ease: 'back.out(1.8)',
+      scrollTrigger: { trigger: barsRef.current, start: 'top 55%', once: true },
+    });
+  }, { scope: barsRef, dependencies: [kpis] });
 
   return (
     <section id="problem" className="ln-section">
