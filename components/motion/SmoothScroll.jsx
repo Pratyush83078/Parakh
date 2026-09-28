@@ -18,10 +18,8 @@ export default function SmoothScroll({ children }) {
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  if (reduced) return <>{children}</>;
-
   return (
-    <ReactLenis root options={{ lerp: 0.11, duration: 1.15, smoothWheel: true }}>
+    <ReactLenis root options={{ lerp: 0.11, duration: 1.15, autoRaf: false, smoothWheel: !reduced, anchors: true, prevent: () => Boolean(document.querySelector('dialog[open]')) }}>
       <ScrollSync>{children}</ScrollSync>
     </ReactLenis>
   );
@@ -34,8 +32,7 @@ function ScrollSync({ children }) {
     if (!lenis) return undefined;
     const update = () => ScrollTrigger.update();
     lenis.on('scroll', update);
-    // Disable GSAP's built-in RAF so Lenis drives the animation loop.
-    gsap.ticker.lagSmoothing(0);
+    // One RAF owner: GSAP ticks Lenis (autoRaf is disabled above).
     const raf = (time) => lenis.raf(time * 1000);
     gsap.ticker.add(raf);
     // Let fonts + fetched data settle before measuring pins.
