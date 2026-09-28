@@ -1,1 +1,0 @@
-Skip this folder, don't read them. they can hallucinate 
