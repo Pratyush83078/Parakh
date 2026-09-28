@@ -6,11 +6,11 @@ import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 import AuroraField from '@/components/motion/AuroraField';
 import MagneticButton from '@/components/motion/MagneticButton';
 import { fmtCr, cleanState } from '@/lib/api';
+import { monthLabel } from '@/lib/monthLabel';
 
 const nf = new Intl.NumberFormat('en-IN');
 export const lakh = (cr) => (cr == null ? '—' : (cr / 1e5).toFixed(2));
-export const monthLabel = (ym, style = 'long') =>
-  ym ? new Date(`${ym}-01T00:00:00`).toLocaleString('en-IN', { month: style, year: 'numeric' }) : '—';
+export { monthLabel };
 const shortMinistry = (m) => (m || '').replace(/^(Ministry|Department) of /, '');
 
 /* ── Proof card: one real flagged project, annotated ─────────────────────── */
@@ -65,8 +65,8 @@ export function HeroSlip({ projects, month, onInspect, loading, error }) {
         </div>
         <div>
           <span className="ln-read-label">Model · next report</span>
-          <span className="ln-read-value">{p.schedule_slipped_risk_pct != null ? `${p.schedule_slipped_risk_pct.toFixed(0)}%` : '—'}</span>
-          <span className="ln-read-note">chance the date moves</span>
+          <span className="ln-read-value">{p.schedule_slipped_risk_pct != null ? `${p.schedule_slipped_risk_pct.toFixed(0)} / 100` : '—'}</span>
+          <span className="ln-read-note">uncalibrated ranking score</span>
         </div>
       </div>
       <footer className="ln-slip-foot">

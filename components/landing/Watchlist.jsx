@@ -1,4 +1,5 @@
 'use client';
+import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import Link from 'next/link';
@@ -30,6 +31,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
 
   return (
     <section id="watchlist" className="ln-section">
+      <GhostWord word="Watch" side="left" />
       <div className="ln-wrap">
         <div className="ln-watch-head">
           <div>
@@ -39,7 +41,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
             <SplitWords as="h2" className="ln-display ln-h2" text="Who needs eyes this month." accent={['eyes']} />
             <Reveal delay={0.12}>
               <p className="ln-body" style={{ marginTop: '1.2rem', maxWidth: '52ch' }}>
-                Highest rule scores in the latest report, beside the model&rsquo;s estimate of a schedule slip.
+                Highest rule scores in the latest report, beside an uncalibrated schedule ranking score.
                 Open a project for its full record and a comparison with its peers.
               </p>
             </Reveal>
@@ -65,7 +67,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
                   <th scope="col">Project</th>
                   <th scope="col">State</th>
                   <th scope="col">Rule score</th>
-                  <th scope="col" className="is-num">Slip, next report</th>
+                  <th scope="col" className="is-num">Slip score / 100</th>
                   <th scope="col" className="is-num">Cost increase</th>
                   <th scope="col" className="is-num">Delay</th>
                   <th scope="col">Main driver</th>
@@ -94,7 +96,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
                         </td>
                         <td className="ln-muted">{cleanState(p.state)}</td>
                         <td><Band band={p.risk_band} score={p.risk_score} /></td>
-                        <td className="is-num ln-num">{p.schedule_slipped_risk_pct != null ? `${p.schedule_slipped_risk_pct.toFixed(0)}%` : '—'}</td>
+                        <td className="is-num ln-num">{p.schedule_slipped_risk_pct != null ? p.schedule_slipped_risk_pct.toFixed(0) : '—'}</td>
                         <td className={`is-num ln-num ${costUp > 0 ? 'ln-up' : ''}`}>{costUp > 0 ? fmtCr(costUp) : '—'}</td>
                         <td className="is-num ln-num">{delay > 0 ? `${delay} mo` : 'On time'}</td>
                         <td><span className="ln-driver-tag" title={getProjectSummary(p)}>{getBottleneckSignal(p)}</span></td>

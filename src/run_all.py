@@ -15,11 +15,12 @@ Usage:
 
 import sys
 import os
-import re
 import time
 import urllib.request
 import urllib.error
 import csv
+import hashlib
+import json
 from pathlib import Path
 
 # Paths
@@ -30,22 +31,16 @@ PROCESSED_DIR = BASE_DIR / "data" / "processed"
 
 # Import internal modules
 sys.path.append(str(BASE_DIR / "src"))
-from pdf_extracter import extract
+from pdf_extracter import PARSER_VERSION, extract_report
 from pipeline import build_full_panel
 from model_train import train_and_compare
 from export_for_backend import export_latest_snapshot
+from report_utils import month_tag_from_filename
 
 
 def parse_month_from_filename(filename: str) -> str:
-    """Extracts a standardized month-year tag (e.g. 'April2026') from PDF filename."""
-    name = Path(filename).stem
-    # Match patterns like FlashReport_April2026 or FlashReport_July_2026
-    m = re.search(r"([A-Za-z]+)[_\s-]*(\d{4})", name)
-    if m:
-        month_name = m.group(1).capitalize()
-        year = m.group(2)
-        return f"{month_name}{year}"
-    return name
+    """Extract a canonical month-year tag without depending on filename prefixes."""
+    return month_tag_from_filename(filename)
 
 
 def step1_extract_all_pdfs(force: bool = False):
@@ -56,39 +51,77 @@ def step1_extract_all_pdfs(force: bool = False):
     PDF_DIR.mkdir(parents=True, exist_ok=True)
     RAW_DIR.mkdir(parents=True, exist_ok=True)
 
-    pdf_files = sorted(PDF_DIR.glob("*.pdf"))
+    pdf_files = sorted(PDF_DIR.rglob("*.pdf"))
     if not pdf_files:
         print(f"[Warning] No PDFs found in {PDF_DIR}. Checking for existing CSVs in {RAW_DIR}...")
         return
 
-    print(f"Found {len(pdf_files)} PDF(s) in {PDF_DIR}")
+    print(f"Found {len(pdf_files)} PDF(s) under {PDF_DIR}")
+    previous_manifest = {}
+    manifest_path = RAW_DIR / "extraction_quality.json"
+    if manifest_path.exists():
+        try:
+            previous_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            previous_manifest = {}
+    previous_by_pdf = {row.get("source_pdf"): row for row in previous_manifest.get("reports", [])}
+    reports = []
+    staged = []
 
     for pdf_path in pdf_files:
         month_tag = parse_month_from_filename(pdf_path.name)
         out_csv = RAW_DIR / f"{month_tag}.csv"
+        source_name = pdf_path.relative_to(BASE_DIR).as_posix()
+        pdf_hash = hashlib.sha256(pdf_path.read_bytes()).hexdigest()
 
-        if out_csv.exists() and not force:
-            print(f"  ✓ {pdf_path.name} ➔ {out_csv.name} already exists. (Use --force-pdf to re-extract)")
+        cached = previous_by_pdf.get(source_name)
+        if (out_csv.exists() and not force and cached
+                and cached.get("sha256") == pdf_hash
+                and cached.get("parser_version") == PARSER_VERSION
+                and cached.get("status") in {"VERIFIED", "REVIEW_REQUIRED"}):
+            print(f"  ✓ {source_name} unchanged; reusing {out_csv.name}")
+            reports.append(cached)
             continue
 
-        print(f"  ➔ Extracting {pdf_path.name} ({month_tag})...")
+        print(f"  ➔ Extracting {source_name} ({month_tag})...")
         t0 = time.time()
         try:
-            records = extract(str(pdf_path), month_tag)
+            records, quality = extract_report(str(pdf_path), month_tag)
+            quality["source_pdf"] = source_name
+            quality["sha256"] = pdf_hash
             if not records:
-                print(f"    [Error] No records extracted from {pdf_path.name}")
-                continue
-
-            fieldnames = list(records[0].keys())
-            with open(out_csv, "w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(records)
-
+                quality["status"] = "FAILED"
+                if "ongoing_project_table_not_found_or_empty" not in quality["errors"]:
+                    quality["errors"].append("no_rows_extracted")
+            else:
+                staged.append((out_csv, records))
+            reports.append(quality)
             elapsed = time.time() - t0
-            print(f"    ✓ Wrote {len(records)} records to {out_csv.name} ({elapsed:.1f}s)")
+            print(f"    {quality['status']}: {len(records)} rows, "
+                  f"{quality['rows_review_required']} flagged, {elapsed:.1f}s")
         except Exception as e:
-            print(f"    [Failed] Error extracting {pdf_path.name}: {e}")
+            reports.append({"source_pdf": source_name, "report_month": month_tag,
+                            "parser_version": PARSER_VERSION, "sha256": pdf_hash,
+                            "status": "FAILED", "errors": [f"{type(e).__name__}: {e}"]})
+            print(f"    FAILED: {e}")
+
+    # Do not partially replace the existing monthly dataset if any input report failed.
+    manifest = {"parser_version": PARSER_VERSION, "reports": reports,
+                "pdf_count": len(pdf_files),
+                "failed_reports": sum(row.get("status") == "FAILED" for row in reports)}
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    if manifest["failed_reports"]:
+        print(f"Extraction stopped: {manifest['failed_reports']} report(s) failed. "
+              f"See {manifest_path.relative_to(BASE_DIR)}; existing monthly CSVs were preserved.")
+        return False
+
+    # CSV replacement begins only after every source report has a parsed result.
+    for out_csv, records in staged:
+        with open(out_csv, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=list(records[0].keys()))
+            writer.writeheader()
+            writer.writerows(records)
+    return True
 
 
 def step2_run_pipeline():
@@ -133,6 +166,15 @@ def step3_train_models(df):
         "generated_by": "src/run_all.py step 3",
         "months": months,
         "horizon": "next monthly report",
+        "evaluation": {
+            "training_rows": "scoring_eligible rows with quality_status=VERIFIED and observed next-report labels",
+            "project_holdout": "five 80/20 GroupShuffleSplit runs; project IDs do not cross each split",
+            "ordered_holdout": "up to the latest three labeled months; train strictly before each test month",
+            "selection": "target-specific model with highest mean ordered-test PR-AUC",
+            "probabilities_calibrated": False,
+            "timeline_proxy": "approval date to target date; reports do not provide a consistent construction start date",
+            "global_explanation": "permutation importance on the latest eligible ordered holdout; predictive signal, not causation",
+        },
         "cost_revised_up_label": cost_res,
         "schedule_slipped_label": sched_res,
     }
@@ -183,7 +225,8 @@ def main():
     print("########################################################")
 
     # Step 1: Batch PDFs
-    step1_extract_all_pdfs(force=force_pdf)
+    if not step1_extract_all_pdfs(force=force_pdf):
+        sys.exit(1)
 
     # Step 2: Build Master Panel
     df = step2_run_pipeline()

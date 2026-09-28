@@ -1,30 +1,25 @@
 'use client';
+import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 import CountUp from '@/components/motion/CountUp';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
-import { monthLabel } from './Hero';
+import { monthLabel } from '@/lib/monthLabel';
 
 const nf = new Intl.NumberFormat('en-IN');
 
 export default function Problem({ kpis, months }) {
   const barsRef = useRef(null);
   const perMonth = Object.entries(kpis?.projects_per_month || {});
-  // Normalise against a baseline BELOW the minimum so the month-over-month
-  // decline is visible, not four equal towers (values are labelled, and the
-  // figcaption says the bars are scaled — truncation stays honest).
   const vals = perMonth.map(([, n]) => n);
-  const vMin = Math.min(...vals, Infinity);
-  const vMax = Math.max(1, ...vals);
-  const vBase = vMin - (vMax - vMin) * 0.4;
-  const heightPct = (n) => 8 + ((n - vBase) / (vMax - vBase)) * 88;
-  const leaked = kpis?.projects_left_since_first_report;
+  const minValue = vals.length ? Math.min(...vals) : 0;
+  const maxValue = vals.length ? Math.max(...vals) : 0;
+  const barHeight = (n) => maxValue === minValue ? 28 : 8 + ((n - minValue) / (maxValue - minValue)) * 32;
 
   useGSAP(() => {
     if (prefersReducedMotion() || !perMonth.length) return;
     // History rises as you arrive, under your hand — scrubbed, not played.
-    // dependencies [kpis]: the bars only exist after the snapshot lands.
     gsap.from(barsRef.current.querySelectorAll('.ln-month-bar'), {
       scaleY: 0, stagger: 0.12, ease: 'none',
       scrollTrigger: { trigger: barsRef.current, start: 'top 88%', end: 'top 45%', scrub: 0.5 },
@@ -33,14 +28,18 @@ export default function Problem({ kpis, months }) {
       autoAlpha: 0, y: 10, duration: 0.7, stagger: 0.12,
       scrollTrigger: { trigger: barsRef.current, start: 'top 70%', once: true },
     });
-    gsap.from(barsRef.current.querySelector('.ln-leak-chip'), {
-      autoAlpha: 0, scale: 0.85, duration: 0.7, ease: 'back.out(1.8)',
-      scrollTrigger: { trigger: barsRef.current, start: 'top 55%', once: true },
-    });
+    const leakEl = barsRef.current?.querySelector('.ln-leak-chip');
+    if (leakEl) {
+      gsap.from(leakEl, {
+        autoAlpha: 0, scale: 0.85, duration: 0.7, ease: 'back.out(1.8)',
+        scrollTrigger: { trigger: barsRef.current, start: 'top 55%', once: true },
+      });
+    }
   }, { scope: barsRef, dependencies: [kpis] });
 
   return (
     <section id="problem" className="ln-section">
+      <GhostWord word="After" side="right" />
       <div className="ln-wrap ln-split-2">
         <div>
           <Reveal className="ln-section-head">
@@ -69,7 +68,7 @@ export default function Problem({ kpis, months }) {
               : perMonth.map(([m, n]) => (
                   <div key={m} className="ln-month">
                     <b className="ln-num"><CountUp value={n} /></b>
-                    <span className="ln-month-bar" style={{ height: `${(n / perMonthMax) * 100}%` }} />
+                    <span className="ln-month-bar" aria-hidden="true" style={{ height: `${barHeight(n)}px` }} />
                     <span>{monthLabel(m, 'short')}</span>
                   </div>
                 ))}
@@ -77,7 +76,7 @@ export default function Problem({ kpis, months }) {
           <figcaption>
             Projects per monthly report.
             {kpis?.projects_left_since_first_report != null && (
-              <> <b className="ln-num">{nf.format(kpis.projects_left_since_first_report)}</b> projects have left the report since the first month.</>
+              <> <b className="ln-num ln-leak-chip">{nf.format(kpis.projects_left_since_first_report)}</b> projects have left the report since the first month.</>
             )}
           </figcaption>
         </figure>

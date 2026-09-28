@@ -11,14 +11,15 @@ def build_labels(df, horizon=1):
     - Matches the future row by calendar month, not by row position, so a project that
       skips a report is not compared against the wrong month.
     """
-    df = df.sort_values(["project_code", "report_month_dt"]).copy()
+    identity = "project_key" if "project_key" in df else "project_code"
+    df = df.sort_values([identity, "report_month_dt"]).copy()
     df["effective_doc"] = df["revised_doc"].fillna(df["target_doc"])
     df["effective_cost_cr"] = df["revised_cost_cr"].fillna(df["original_cost_cr"])
 
-    future = df[["project_code", "report_month_dt", "effective_doc", "effective_cost_cr"]].copy()
+    future = df[[identity, "report_month_dt", "effective_doc", "effective_cost_cr"]].copy()
     future["report_month_dt"] = future["report_month_dt"] - pd.DateOffset(months=horizon)
     future = future.rename(columns={"effective_doc": "doc_future", "effective_cost_cr": "cost_future"})
-    df = df.merge(future, on=["project_code", "report_month_dt"], how="left")
+    df = df.merge(future, on=[identity, "report_month_dt"], how="left")
 
     has_cost = df["cost_future"].notna() & df["effective_cost_cr"].notna()
     has_doc = df["doc_future"].notna() & df["effective_doc"].notna()

@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '@/lib/gsap';
+import metrics from '@/data/processed/model_metrics.json';
 
 /**
  * Vital-signs marquee — real portfolio numbers, duplicated for a seamless loop.
@@ -63,8 +64,8 @@ export default function Ticker({ kpis }) {
     <><b className="ln-num">{nf.format(kpis.total_projects)}</b> projects in the latest report</>,
     <><b className="ln-num">₹{((kpis.total_revised_cost_cr || 0) / 1e5).toFixed(2)} lakh crore</b> revised cost</>,
     <><b className="ln-num">{nf.format((bands.High || 0) + (bands.Critical || 0))}</b> high or critical risk</>,
-    <><b className="ln-num">{nf.format(kpis.projects_left_since_first_report)}</b> projects left the list since April</>,
-    <>Slip model <b className="ln-num">0.75</b> ROC-AUC on a later month</>,
+    <><b className="ln-num">{nf.format(kpis.projects_left_since_first_report)}</b> projects left since the first recorded report</>,
+    <>{metrics.schedule_slipped_label.selected_model.replaceAll('_', ' ')} slip model <b className="ln-num">{metrics.schedule_slipped_label.temporal_split[metrics.schedule_slipped_label.selected_model].roc_auc.toFixed(2)}</b> mean ROC-AUC on ordered months</>,
     <>Rule score <b className="ln-num">0&ndash;100</b>, open arithmetic</>,
   ];
   const row = (key) => (

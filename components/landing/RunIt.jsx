@@ -1,4 +1,5 @@
 'use client';
+import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import Link from 'next/link';
@@ -40,6 +41,7 @@ export default function RunIt() {
 
   return (
     <section id="run" className="ln-section">
+      <GhostWord word="Run" side="left" />
       <div className="ln-wrap ln-run-grid">
         <div>
           <Reveal className="ln-section-head">

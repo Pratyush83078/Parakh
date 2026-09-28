@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { X, Download, ArrowUpRight } from 'lucide-react';
+import { X, Download, ArrowUpRight, FileText } from 'lucide-react';
 import { cleanState, fmtCr, fmtPct } from '@/lib/api';
 import { exportToCsv } from '@/lib/intelligence';
 import Modal from '@/components/Modal';
@@ -20,8 +20,12 @@ export default function ProjectDrawer({ project: p, onClose, peers }) {
         {p.agency && <p>{p.agency.replace(/[()]/g, '').trim()}</p>}
       </header>
       <div className="record-content">
+        {p.source_pdf && <section><h3>Source evidence</h3><a className="text-link" href={`/api/projects/${encodeURIComponent(p.project_code)}/source#page=${encodeURIComponent(p.source_page || 1)}`} target="_blank" rel="noreferrer"><FileText size={15} aria-hidden="true" /> {p.source_pdf.split(/[\\/]/).pop()} · page {p.source_page || 'not recorded'}</a>
+          {p.quality_status && <p><span className={`ln-status ${p.quality_status === 'VERIFIED' ? 'status-built' : 'status-partial'}`}>{p.quality_status === 'VERIFIED' ? 'Source row verified' : 'Review required'}</span></p>}
+          {p.quality_warnings && <p className="workspace-note">Review flags: {Array.isArray(p.quality_warnings) ? p.quality_warnings.join(' · ') : p.quality_warnings}</p>}
+        </section>}
         <section className="record-assessment"><div><span className="record-label">Current rule score</span><strong className="record-score">{number(p.risk_score)}<small> / 100</small></strong></div>
-          <div><h3>{p.primary_risk_driver || 'No driver reported'}</h3><p>The main rule-based signal in this record. Check the reported figures below before deciding what needs review.</p><Link href="/about#reading-risk" onClick={onClose} className="text-link">How scores work <ArrowUpRight size={14} /></Link></div></section>
+          <div><h3>{p.primary_risk_driver || 'No driver reported'}</h3><p>{p.risk_coverage_pct == null ? 'No weighted inputs were available.' : `${number(p.risk_coverage_pct, '%')} of weighted inputs were available.`} Missing values are excluded and the remaining weights are renormalized. Check the source figures before deciding what needs review.</p><Link href="/about#reading-risk" onClick={onClose} className="text-link">How scores work <ArrowUpRight size={14} /></Link></div></section>
         <section><h3>Budget and spending</h3><dl className="record-facts">
           {[
             ['Original approved cost', fmtCr(p.original_cost_cr)], ['Revised cost', fmtCr(p.revised_cost_cr)],
@@ -34,10 +38,10 @@ export default function ProjectDrawer({ project: p, onClose, peers }) {
             ['Progress gap vs expected', number(p.progress_gap, ' percentage points')],
           ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
         </dl></section>
-        <section className="record-model"><h3>What might change next report?</h3><div className="model-readout"><span>Schedule-slip estimate</span><strong>{number(p.schedule_slipped_risk_pct, '%')}</strong></div>
-          <p>Experimental model output, not a confirmed forecast. A completion date moving is different from a project failing.</p>
-          <details><summary>Cost-model output · not reliable for forecasting</summary><p>Raw estimate: {number(p.cost_revised_up_risk_pct, '%')}. The cost model’s later-month ROC-AUC is {metrics.cost_revised_up_label.temporal_split.gradient_boosting.roc_auc.toFixed(3)}. Do not use this estimate to forecast cost increases.</p></details>
-          <p className="workspace-note">Gradient boosting · Schedule temporal ROC-AUC {metrics.schedule_slipped_label.temporal_split.gradient_boosting.roc_auc.toFixed(3)} · {metrics.months.length} monthly reports. Probabilities still need calibration validation.</p>
+        <section className="record-model"><h3>What might change next report?</h3><div className="model-readout"><span>Schedule model ranking score · uncalibrated</span><strong>{number(p.schedule_slipped_risk_pct)} / 100</strong></div>
+          <p>Experimental ranking signal, not a calibrated event probability or confirmed forecast. A completion date moving is different from a project failing.</p>
+          <details><summary>Cost-model score · not reliable for forecasting</summary><p>Raw ranking score: {number(p.cost_revised_up_risk_pct)} / 100. Ordered-month mean ROC-AUC is {metrics.cost_revised_up_label.temporal_split[metrics.cost_revised_up_label.selected_model].roc_auc.toFixed(3)}. Do not use this estimate to forecast cost increases.</p></details>
+          <p className="workspace-note">{metrics.schedule_slipped_label.selected_model.replaceAll('_', ' ')} · Schedule ordered-month mean ROC-AUC {metrics.schedule_slipped_label.temporal_split[metrics.schedule_slipped_label.selected_model].roc_auc.toFixed(3)} · {metrics.months.length} monthly reports. Model scores are not calibrated probabilities.</p>
         </section>
         <section><h3>Compare with its peers</h3>
           {!peers ? <p>Peer data could not be loaded. Reopen this record to try again.</p> : !peers.peer_group?.count ? <p>No other projects in the same ministry and state are available for comparison.</p> : <>

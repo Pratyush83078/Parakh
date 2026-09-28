@@ -22,8 +22,8 @@ The project addresses SIH 26103's request for prediction, comparison with conven
 | April 2026 original cost | ₹37,12,662 crore = ₹37.13 lakh crore | Reported total |
 | April 2026 revised cost | ₹42,78,402 crore = ₹42.78 lakh crore | Reported total |
 | April 2026 expenditure | ₹20,36,107 crore = ₹20.36 lakh crore; 47.59% of revised cost | Reported total, not a forecast |
-| Prototype source data | Four monthly reports: April–July 2026 | The repository does not contain the historic two-decade OCMS series |
-| Current panel | 7,590 project-month rows; 2,074 unique projects across four reports | Generated prototype data, not the current PAIMANA portfolio size |
+| Prototype source data | 17 monthly reports: March 2025–July 2026, covering OCMS and PAIMANA formats | The repository does not contain the historic two-decade OCMS series |
+| Current panel | 25,116 identified project-month rows; 3,950 official-ID histories | Generated prototype data, not the current live PAIMANA portfolio |
 | Latest prototype snapshot | July 2026; 1,775 projects | Clearly label the report month |
 | April reconciliation (`src/checker.py`) | 1,981 projects and all three cost/expenditure totals match the official report to the displayed precision (0.0% difference) | Evidence that the April extraction reconciles at portfolio level; it does not prove every field is correct |
 | Quality checker output | 0 hard failures; 7 warning categories | The checker is a separate script today, not a gate wired into `src/run_all.py` |
@@ -34,12 +34,12 @@ The checked-in April PDF is `data/pdfs/FlashReport_April2026.pdf`. Its first pag
 
 The checked-in `data/processed/model_metrics.json` records a single chronological holdout on June 2026 rows, with the next report in July. It is not a multi-year prospective evaluation.
 
-| Target, June → July holdout | Gradient boosting | Logistic regression | What follows |
+| Target and ordered test window | Gradient boosting | Logistic regression | What follows |
 |---|---:|---:|---|
-| Schedule-date change; 1,732 labelled rows, 268 positives | ROC-AUC 0.767; PR-AUC 0.342 | ROC-AUC 0.728; PR-AUC 0.280 | Promising prototype signal, still one held-out month |
-| Cost revision; 1,732 labelled rows, 72 positives | ROC-AUC 0.436; PR-AUC 0.039 | ROC-AUC 0.503; PR-AUC 0.044 | Not suitable for cost-risk decisions today |
+| Schedule-date change; April–June 2026 test months, 268 positive cases in June | Mean ROC-AUC 0.777; mean PR-AUC 0.376 | Mean ROC-AUC 0.762; mean PR-AUC 0.340 | Preliminary ranking signal across three test months |
+| Cost revision; June 2026 test, 1,732 rows and 72 positives | ROC-AUC 0.704; PR-AUC 0.076 | ROC-AUC 0.672; PR-AUC 0.131 | Weak, imbalanced evidence from one test month; not suitable for cost-risk decisions |
 
-The schedule result is preliminary. The cost model is weak. The saved probabilities are not calibrated. Do not turn these metrics into a broad accuracy claim, promise a dependable percentage probability, or imply the system is ready to recommend or dispatch interventions. Group-separated results are a different evaluation question; do not present them as time-forward performance.
+The schedule result is preliminary. The cost model is weak and has only one eligible ordered test month. The saved probabilities are not calibrated. Do not turn these metrics into a broad accuracy claim, promise a dependable percentage probability, or imply the system is ready to recommend or dispatch interventions. Group-separated results are a different evaluation question; do not present them as time-forward performance.
 
 ## What exists and what is proposed
 
@@ -60,9 +60,9 @@ Quality warnings are signals for investigation, not confirmed extraction defects
 The supplied SIH 2026 deck has six allowed slides including the title page. Slide 7 is an instruction slide that explicitly may be removed for submission. Keep the six existing content pointers and their order; delete only that final instruction slide.
 
 1. **Title page** — PARAKH; Problem Statement ID 26103; exact SIH title; Smart Automation; Software; placeholders for registered team name and Team ID.
-2. **Idea title / proposed solution** — two-sentence idea, target audience, prototype scope (four reports, July snapshot), and the distinction between an existing searchable dashboard and the planned evidence/review workflow.
-3. **Technical approach** — editable flow: MoSPI PDFs → coordinate extraction and cleaning → data checks / evidence → current rule score + next-report model experiments → Next.js project review. Name only dependencies actually used. Include a compact, dated evaluation note: schedule model 0.767 ROC-AUC / 0.342 PR-AUC; cost model 0.436 / 0.039 on the June-to-July temporal holdout.
-4. **Feasibility and viability** — current Python/Next.js stack is open-source and runs locally; no external API, paid LLM, or new database is required for this prototype. Risks: only four months, fragile PDF layouts, unresolved warning rows, one temporal holdout, weak cost model, and human adoption. Controls: historical reports, per-report schema and totals checks, page-level evidence, repeated time-forward evaluation, visible uncertainty, and analyst review. Mark proposed controls as next work.
+2. **Idea title / proposed solution** — two-sentence idea, target audience, prototype scope (17 reports, July snapshot), and the distinction between an existing searchable dashboard and the planned evidence/review workflow.
+3. **Technical approach** — editable flow: MoSPI PDFs → text/table extraction and cleaning → data checks / evidence → current rule score + next-report model experiments → Next.js project review. Name only dependencies actually used. Include a compact, dated evaluation note: schedule model mean 0.777 ROC-AUC / 0.376 PR-AUC across April–June 2026 ordered test months; cost model 0.672 / 0.131 on June 2026 (one eligible test month).
+4. **Feasibility and viability** — current Python/Next.js stack is open-source and runs locally; no external API, paid LLM, or new database is required for this prototype. Risks: limited history, fragile PDF layouts, unresolved warning rows, one cost-model holdout month, weak cost evidence, and human adoption. Controls: per-report schema and totals checks, page-level evidence, repeated time-forward evaluation, visible uncertainty, and analyst review. Mark proposed controls as next work.
 5. **Impact and benefits** — show dated portfolio scale (April: 1,981 projects / ₹42.78 lakh crore revised cost) and what the prototype changes today (searchable, ranked review). Analogy: an inspection triage board points an analyst to a project and its evidence; it does not approve action. Benefits are intended, not measured. State that reviewer time, warning lead time, and false-alert rate need a pilot baseline.
 6. **Research and references** — cite the official MoSPI April report and PAIMANA report page; SIH 26103 problem brief; prototype source and metric artifact. Put direct, readable source names and links on the slide and source details in speaker notes.
 

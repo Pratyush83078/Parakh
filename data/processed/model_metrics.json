@@ -1,64 +1,388 @@
 {
   "generated_by": "src/run_all.py step 3",
   "months": [
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-02",
+    "2026-03",
     "2026-04",
     "2026-05",
     "2026-06",
     "2026-07"
   ],
   "horizon": "next monthly report",
+  "evaluation": {
+    "training_rows": "scoring_eligible rows with quality_status=VERIFIED and observed next-report labels",
+    "project_holdout": "five 80/20 GroupShuffleSplit runs; project IDs do not cross each split",
+    "ordered_holdout": "up to the latest three labeled months; train strictly before each test month",
+    "selection": "target-specific model with highest mean ordered-test PR-AUC",
+    "probabilities_calibrated": false,
+    "timeline_proxy": "approval date to target date; reports do not provide a consistent construction start date",
+    "global_explanation": "permutation importance on the latest eligible ordered holdout; predictive signal, not causation"
+  },
   "cost_revised_up_label": {
+    "n_rows_excluded_unverified_or_ineligible": 687,
+    "selected_model": "logistic_regression",
+    "features": [
+      "original_cost_cr",
+      "months_since_approval",
+      "approval_to_target_m",
+      "approval_elapsed_frac",
+      "progress_gap",
+      "expenditure_util_pct",
+      "spend_vs_progress_gap",
+      "doc_already_slipped",
+      "doc_slip_months_so_far",
+      "progress_velocity",
+      "cost_revision_count_cum",
+      "doc_revision_count_cum",
+      "agency_avg_overrun"
+    ],
     "group_split": {
-      "n_test_projects": 402,
-      "n_test_rows": 1122,
-      "n_test_positives": 20,
+      "n_test_projects": 759,
+      "n_test_rows": 3675,
+      "n_test_positives": 41,
+      "n_splits": 5,
+      "n_rows_used": 18257,
+      "n_projects_used": 3794,
+      "n_positive_labels": 178,
+      "positive_rate": 0.0097,
+      "models": {
+        "logistic_regression": {
+          "roc_auc": 0.684,
+          "roc_auc_std": 0.029,
+          "pr_auc": 0.034,
+          "pr_auc_std": 0.009,
+          "positive_rate": 0.01,
+          "positive_rate_std": 0.001,
+          "pr_lift_over_prevalence": 3.246,
+          "pr_lift_over_prevalence_std": 0.878,
+          "brier_score": 0.01,
+          "brier_score_std": 0.001
+        },
+        "gradient_boosting": {
+          "roc_auc": 0.781,
+          "roc_auc_std": 0.036,
+          "pr_auc": 0.04,
+          "pr_auc_std": 0.011,
+          "positive_rate": 0.01,
+          "positive_rate_std": 0.001,
+          "pr_lift_over_prevalence": 3.82,
+          "pr_lift_over_prevalence_std": 0.84,
+          "brier_score": 0.013,
+          "brier_score_std": 0.002
+        }
+      },
+      "rule_score": {
+        "roc_auc": 0.57,
+        "roc_auc_std": 0.049,
+        "pr_auc": 0.018,
+        "pr_auc_std": 0.006,
+        "positive_rate": 0.01,
+        "positive_rate_std": 0.001,
+        "pr_lift_over_prevalence": 1.74,
+        "pr_lift_over_prevalence_std": 0.688
+      },
       "logistic_regression": {
-        "roc_auc": 0.798,
-        "pr_auc": 0.077
+        "roc_auc": 0.684,
+        "roc_auc_std": 0.029,
+        "pr_auc": 0.034,
+        "pr_auc_std": 0.009,
+        "positive_rate": 0.01,
+        "positive_rate_std": 0.001,
+        "pr_lift_over_prevalence": 3.246,
+        "pr_lift_over_prevalence_std": 0.878,
+        "brier_score": 0.01,
+        "brier_score_std": 0.001
       },
       "gradient_boosting": {
-        "roc_auc": 0.88,
-        "pr_auc": 0.161
-      }
+        "roc_auc": 0.781,
+        "roc_auc_std": 0.036,
+        "pr_auc": 0.04,
+        "pr_auc_std": 0.011,
+        "positive_rate": 0.01,
+        "positive_rate_std": 0.001,
+        "pr_lift_over_prevalence": 3.82,
+        "pr_lift_over_prevalence_std": 0.84,
+        "brier_score": 0.013,
+        "brier_score_std": 0.002
+      },
+      "rule_score_roc_auc": 0.57
     },
     "temporal_split": {
       "test_month": "2026-06",
+      "months": [
+        {
+          "test_month": "2026-06",
+          "n_test_rows": 1732,
+          "n_test_positives": 72,
+          "positive_rate": 0.0416,
+          "rule_score": {
+            "roc_auc": 0.586,
+            "pr_auc": 0.064,
+            "positive_rate": 0.0416,
+            "pr_lift_over_prevalence": 1.55
+          }
+        }
+      ],
+      "models": {
+        "logistic_regression": {
+          "roc_auc": 0.672,
+          "pr_auc": 0.131,
+          "positive_rate": 0.042,
+          "pr_lift_over_prevalence": 3.16,
+          "brier_score": 0.047
+        },
+        "gradient_boosting": {
+          "roc_auc": 0.704,
+          "pr_auc": 0.076,
+          "positive_rate": 0.042,
+          "pr_lift_over_prevalence": 1.83,
+          "brier_score": 0.043
+        }
+      },
+      "rule_score": {
+        "roc_auc": 0.586,
+        "pr_auc": 0.064,
+        "positive_rate": 0.042,
+        "pr_lift_over_prevalence": 1.55
+      },
       "logistic_regression": {
-        "roc_auc": 0.503,
-        "pr_auc": 0.044
+        "roc_auc": 0.672,
+        "pr_auc": 0.131,
+        "positive_rate": 0.042,
+        "pr_lift_over_prevalence": 3.16,
+        "brier_score": 0.047
       },
       "gradient_boosting": {
-        "roc_auc": 0.436,
-        "pr_auc": 0.039
+        "roc_auc": 0.704,
+        "pr_auc": 0.076,
+        "positive_rate": 0.042,
+        "pr_lift_over_prevalence": 1.83,
+        "brier_score": 0.043
+      },
+      "rule_score_roc_auc": 0.586,
+      "selected_model_permutation_importance": {
+        "months_since_approval": 0.0961,
+        "expenditure_util_pct": 0.0855,
+        "doc_revision_count_cum": 0.0274,
+        "doc_slip_months_so_far": 0.0216,
+        "progress_gap": 0.0175,
+        "spend_vs_progress_gap": 0.0042,
+        "progress_velocity": 0.0042,
+        "doc_already_slipped": 0.0007
       }
-    },
-    "rule_score_roc_auc": 0.609
+    }
   },
   "schedule_slipped_label": {
+    "n_rows_excluded_unverified_or_ineligible": 635,
+    "selected_model": "gradient_boosting",
+    "features": [
+      "original_cost_cr",
+      "months_since_approval",
+      "approval_to_target_m",
+      "approval_elapsed_frac",
+      "progress_gap",
+      "expenditure_util_pct",
+      "spend_vs_progress_gap",
+      "doc_already_slipped",
+      "doc_slip_months_so_far",
+      "progress_velocity",
+      "cost_revision_count_cum",
+      "doc_revision_count_cum",
+      "agency_avg_overrun"
+    ],
     "group_split": {
-      "n_test_projects": 402,
-      "n_test_rows": 1120,
-      "n_test_positives": 198,
+      "n_test_projects": 759,
+      "n_test_rows": 3675,
+      "n_test_positives": 469,
+      "n_splits": 5,
+      "n_rows_used": 18257,
+      "n_projects_used": 3794,
+      "n_positive_labels": 2530,
+      "positive_rate": 0.1386,
+      "models": {
+        "logistic_regression": {
+          "roc_auc": 0.782,
+          "roc_auc_std": 0.009,
+          "pr_auc": 0.346,
+          "pr_auc_std": 0.01,
+          "positive_rate": 0.134,
+          "positive_rate_std": 0.008,
+          "pr_lift_over_prevalence": 2.58,
+          "pr_lift_over_prevalence_std": 0.128,
+          "brier_score": 0.101,
+          "brier_score_std": 0.006
+        },
+        "gradient_boosting": {
+          "roc_auc": 0.85,
+          "roc_auc_std": 0.008,
+          "pr_auc": 0.561,
+          "pr_auc_std": 0.026,
+          "positive_rate": 0.134,
+          "positive_rate_std": 0.008,
+          "pr_lift_over_prevalence": 4.18,
+          "pr_lift_over_prevalence_std": 0.212,
+          "brier_score": 0.083,
+          "brier_score_std": 0.004
+        }
+      },
+      "rule_score": {
+        "roc_auc": 0.526,
+        "roc_auc_std": 0.009,
+        "pr_auc": 0.135,
+        "pr_auc_std": 0.007,
+        "positive_rate": 0.134,
+        "positive_rate_std": 0.008,
+        "pr_lift_over_prevalence": 1.006,
+        "pr_lift_over_prevalence_std": 0.036
+      },
       "logistic_regression": {
-        "roc_auc": 0.799,
-        "pr_auc": 0.399
+        "roc_auc": 0.782,
+        "roc_auc_std": 0.009,
+        "pr_auc": 0.346,
+        "pr_auc_std": 0.01,
+        "positive_rate": 0.134,
+        "positive_rate_std": 0.008,
+        "pr_lift_over_prevalence": 2.58,
+        "pr_lift_over_prevalence_std": 0.128,
+        "brier_score": 0.101,
+        "brier_score_std": 0.006
       },
       "gradient_boosting": {
-        "roc_auc": 0.842,
-        "pr_auc": 0.55
-      }
+        "roc_auc": 0.85,
+        "roc_auc_std": 0.008,
+        "pr_auc": 0.561,
+        "pr_auc_std": 0.026,
+        "positive_rate": 0.134,
+        "positive_rate_std": 0.008,
+        "pr_lift_over_prevalence": 4.18,
+        "pr_lift_over_prevalence_std": 0.212,
+        "brier_score": 0.083,
+        "brier_score_std": 0.004
+      },
+      "rule_score_roc_auc": 0.526
     },
     "temporal_split": {
       "test_month": "2026-06",
+      "months": [
+        {
+          "test_month": "2026-04",
+          "n_test_rows": 1951,
+          "n_test_positives": 439,
+          "positive_rate": 0.225,
+          "rule_score": {
+            "roc_auc": 0.581,
+            "pr_auc": 0.255,
+            "positive_rate": 0.225,
+            "pr_lift_over_prevalence": 1.13
+          }
+        },
+        {
+          "test_month": "2026-05",
+          "n_test_rows": 1814,
+          "n_test_positives": 295,
+          "positive_rate": 0.1626,
+          "rule_score": {
+            "roc_auc": 0.536,
+            "pr_auc": 0.163,
+            "positive_rate": 0.1626,
+            "pr_lift_over_prevalence": 1.0
+          }
+        },
+        {
+          "test_month": "2026-06",
+          "n_test_rows": 1732,
+          "n_test_positives": 268,
+          "positive_rate": 0.1547,
+          "rule_score": {
+            "roc_auc": 0.582,
+            "pr_auc": 0.186,
+            "positive_rate": 0.1547,
+            "pr_lift_over_prevalence": 1.2
+          }
+        }
+      ],
+      "models": {
+        "logistic_regression": {
+          "roc_auc": 0.762,
+          "roc_auc_std": 0.027,
+          "pr_auc": 0.34,
+          "pr_auc_std": 0.019,
+          "positive_rate": 0.181,
+          "positive_rate_std": 0.039,
+          "pr_lift_over_prevalence": 1.92,
+          "pr_lift_over_prevalence_std": 0.296,
+          "brier_score": 0.135,
+          "brier_score_std": 0.022
+        },
+        "gradient_boosting": {
+          "roc_auc": 0.777,
+          "roc_auc_std": 0.014,
+          "pr_auc": 0.376,
+          "pr_auc_std": 0.05,
+          "positive_rate": 0.181,
+          "positive_rate_std": 0.039,
+          "pr_lift_over_prevalence": 2.107,
+          "pr_lift_over_prevalence_std": 0.268,
+          "brier_score": 0.13,
+          "brier_score_std": 0.022
+        }
+      },
+      "rule_score": {
+        "roc_auc": 0.566,
+        "roc_auc_std": 0.026,
+        "pr_auc": 0.201,
+        "pr_auc_std": 0.048,
+        "positive_rate": 0.181,
+        "positive_rate_std": 0.039,
+        "pr_lift_over_prevalence": 1.11,
+        "pr_lift_over_prevalence_std": 0.101
+      },
       "logistic_regression": {
-        "roc_auc": 0.728,
-        "pr_auc": 0.28
+        "roc_auc": 0.762,
+        "roc_auc_std": 0.027,
+        "pr_auc": 0.34,
+        "pr_auc_std": 0.019,
+        "positive_rate": 0.181,
+        "positive_rate_std": 0.039,
+        "pr_lift_over_prevalence": 1.92,
+        "pr_lift_over_prevalence_std": 0.296,
+        "brier_score": 0.135,
+        "brier_score_std": 0.022
       },
       "gradient_boosting": {
-        "roc_auc": 0.767,
-        "pr_auc": 0.342
+        "roc_auc": 0.777,
+        "roc_auc_std": 0.014,
+        "pr_auc": 0.376,
+        "pr_auc_std": 0.05,
+        "positive_rate": 0.181,
+        "positive_rate_std": 0.039,
+        "pr_lift_over_prevalence": 2.107,
+        "pr_lift_over_prevalence_std": 0.268,
+        "brier_score": 0.13,
+        "brier_score_std": 0.022
+      },
+      "rule_score_roc_auc": 0.566,
+      "selected_model_permutation_importance": {
+        "approval_elapsed_frac": 0.1257,
+        "progress_gap": 0.068,
+        "doc_revision_count_cum": 0.0501,
+        "expenditure_util_pct": 0.0407,
+        "doc_slip_months_so_far": 0.0228,
+        "approval_to_target_m": 0.0152,
+        "months_since_approval": 0.0056,
+        "progress_velocity": 0.0049
       }
-    },
-    "rule_score_roc_auc": 0.574
+    }
   }
 }

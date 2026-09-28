@@ -27,7 +27,8 @@ print(f"Rows {len(df)} | projects {df.project_code.nunique()}")
 print(df.groupby(month.dt.strftime("%Y-%m")).size().to_string(), "\n")
 
 # 1. Identity
-dups = df.duplicated(["project_code", "report_month_dt"]).sum()
+identity = "project_key" if "project_key" in df else "project_code"
+dups = df.duplicated([identity, "report_month_dt"]).sum()
 check(dups == 0, f"{dups} duplicate project-month rows")
 
 # 2. Completeness
@@ -40,8 +41,18 @@ for c in ["original_cost_cr", "physical_progress_pct", "target_doc"]:
 
 # 3. Ranges
 p = df.physical_progress_pct
-n = ((p < 0) | (p > 100)).sum()
-check(n == 0, f"{n} rows with progress outside 0-100")
+bad_progress = p.notna() & ~p.between(0, 100)
+n = int(bad_progress.sum())
+if n:
+    safely_flagged = (
+        df.get("quality_status", pd.Series("VERIFIED", index=df.index)).eq("REVIEW_REQUIRED")
+        & ~df.get("scoring_eligible", pd.Series(True, index=df.index)).fillna(False)
+    )
+    unsafe = bad_progress & ~safely_flagged
+    check(not unsafe.any(),
+          f"{int(unsafe.sum())} out-of-range progress rows are not both review-required and excluded from scoring")
+    if not unsafe.any():
+        warns.append(f"{n} out-of-range progress row(s) are review-required and excluded from scoring")
 n = (df.original_cost_cr <= 0).sum()
 check(n == 0, f"{n} rows with original cost <= 0")
 n = (df.original_cost_cr < 150).sum()
@@ -59,13 +70,17 @@ n = (df.revised_doc < df.target_doc).sum()
 check(n == 0, f"{n} rows with revised completion earlier than original", hard=False)
 
 # 5. Month-over-month consistency
-g = df.sort_values(["project_code", "report_month_dt"]).groupby("project_code")
+g = df.sort_values([identity, "report_month_dt"]).groupby(identity)
 n = (g.physical_progress_pct.diff() < -1).sum()
 check(n == 0, f"{n} month-to-month drops in physical progress > 1 pt", hard=False)
 n = (g.report_month_dt.diff().dt.days > 40).sum()
 check(n == 0, f"{n} project histories skip a month (labels treat the gap as unlabelled)", hard=False)
-latest = df[month == month.max()].project_code.nunique()
-print(f"Projects absent from the latest month: {df.project_code.nunique() - latest}")
+latest = df[month == month.max()][identity].nunique()
+print(f"Projects absent from the latest month: {df[identity].nunique() - latest}")
+if "quality_status" in df:
+    print("\nExtraction quality status:")
+    print(df.quality_status.value_counts(dropna=False).to_string())
+    print(f"Scoring-eligible records: {int(df.scoring_eligible.sum()) if 'scoring_eligible' in df else 'unknown'}")
 
 # 6. Label coverage
 for lab in ["cost_revised_up_label", "schedule_slipped_label"]:
@@ -74,7 +89,7 @@ for lab in ["cost_revised_up_label", "schedule_slipped_label"]:
               f"({df[lab].mean() * 100:.1f}%)")
 
 # 7. Reconciliation with official April totals
-apr = df[month == month.min()]
+apr = df[month == pd.Timestamp("2026-04-01")]
 got = {"projects": len(apr), "original": apr.original_cost_cr.sum() / 1e5,
        "revised": budget[apr.index].sum() / 1e5, "expenditure": apr.cumulative_expenditure_cr.sum() / 1e5}
 print("\nApril reconciliation (ours vs official):")

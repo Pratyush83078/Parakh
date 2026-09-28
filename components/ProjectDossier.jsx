@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, Download, MapPin, Building2, CalendarClock } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Download, MapPin, Building2, CalendarClock, FileText } from 'lucide-react';
 import { gsap, useGSAP } from '@/lib/gsap';
 import Modal from '@/components/Modal';
 import AuroraField from '@/components/motion/AuroraField';
@@ -10,6 +10,7 @@ import CountUp from '@/components/motion/CountUp';
 import WhatIfSimulator from '@/components/WhatIfSimulator';
 import metrics from '@/data/processed/model_metrics.json';
 import { cleanState, fmtCr, fmtPct, scoreColor } from '@/lib/api';
+import { monthLabel } from '@/lib/monthLabel';
 import { exportToCsv } from '@/lib/intelligence';
 
 const nf = new Intl.NumberFormat('en-IN');
@@ -69,7 +70,7 @@ function SlipGauge({ pct }) {
   }, [p]);
 
   return (
-    <div className="ds-gauge" role="img" aria-label={`Estimated ${num1(pct, '%')} chance the completion date moves next report`}>
+      <div className="ds-gauge" role="img" aria-label={`Uncalibrated schedule model score ${num1(pct)} out of 100`}>
       <svg viewBox="0 0 150 84" aria-hidden="true">
         <path d={`M 17 75 A ${R} ${R} 0 0 1 133 75`} fill="none" stroke="var(--ln-hairline)" strokeWidth="9" strokeLinecap="round" />
         <path
@@ -79,8 +80,8 @@ function SlipGauge({ pct }) {
         />
       </svg>
       <div className="ds-gauge-read">
-        <strong><CountUp value={pct ?? 0} decimals={0} suffix="%" /></strong>
-        <span>chance the date moves</span>
+        <strong><CountUp value={pct ?? 0} decimals={0} /></strong>
+        <span>raw score / 100</span>
       </div>
     </div>
   );
@@ -140,11 +141,13 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
 
   const spendPct = p.revised_cost_cr > 0 ? (p.cumulative_expenditure_cr ?? 0) / p.revised_cost_cr * 100 : 0;
   const overrunPct = (p.cost_overrun_ratio_so_far ?? 0) * 100;
+  const revisionCount = (p.cost_revision_count_cum ?? 0) + (p.doc_revision_count_cum ?? 0);
   const signals = [
-    { label: 'Cost overrun', note: 'capped at +50% of approved cost', frac: (p.cost_overrun_ratio_so_far ?? 0) / 0.5, value: fmtPct(p.cost_overrun_ratio_so_far) },
-    { label: 'Schedule slip', note: 'capped at 36 months', frac: (p.doc_slip_months_so_far ?? 0) / 36, value: `${p.doc_slip_months_so_far ?? 0} mo` },
-    { label: 'Progress behind plan', note: 'capped at 40 points behind', frac: Math.max(0, -(p.progress_gap ?? 0)) / 40, value: num1(Math.max(0, -(p.progress_gap ?? 0)), ' pts') },
-    { label: 'Spend ahead of progress', note: 'capped at 40 points ahead', frac: Math.max(0, spendPct - (p.physical_progress_pct ?? 0)) / 40, value: num1(Math.max(0, spendPct - (p.physical_progress_pct ?? 0)), ' pts') },
+    { label: 'Cost overrun', note: 'capped at +50% of approved cost', frac: p.cost_overrun_ratio_so_far == null ? 0 : p.cost_overrun_ratio_so_far / 0.5, value: fmtPct(p.cost_overrun_ratio_so_far) ?? 'Not reported' },
+    { label: 'Schedule slip', note: 'capped at 36 months', frac: p.doc_slip_months_so_far == null ? 0 : p.doc_slip_months_so_far / 36, value: p.doc_slip_months_so_far == null ? 'Not reported' : `${p.doc_slip_months_so_far} mo` },
+    { label: 'Progress behind plan', note: 'linear timeline proxy; capped at 40 points', frac: p.progress_gap == null ? 0 : Math.max(0, -p.progress_gap) / 40, value: p.progress_gap == null ? 'Not reported' : num1(Math.max(0, -p.progress_gap), ' pts') },
+    { label: 'Spend ahead of progress', note: 'capped at 40 points ahead', frac: p.revised_cost_cr > 0 && p.physical_progress_pct != null ? Math.max(0, spendPct - p.physical_progress_pct) / 40 : 0, value: p.revised_cost_cr > 0 && p.physical_progress_pct != null ? num1(Math.max(0, spendPct - p.physical_progress_pct), ' pts') : 'Not reported' },
+    { label: 'Repeated revisions', note: 'capped at three recorded revisions', frac: revisionCount / 3, value: `${revisionCount} recorded` },
   ];
 
   useGSAP(() => {
@@ -203,7 +206,7 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
               <div>
                 <p className="ln-eyebrow ds-hero-eyebrow">
                   <span className="ln-idx">Project record</span> {p.report_month_dt
-                    ? new Date(p.report_month_dt).toLocaleString('en-IN', { month: 'long', year: 'numeric' }) + ' report'
+                    ? monthLabel(p.report_month_dt.slice(0, 7)) + ' report'
                     : 'latest report'}
                 </p>
                 <h1 id="dossier-title" className="ln-display ds-hero-title ln-split" aria-label={p.project_name}>
@@ -219,6 +222,11 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
                   {p.agency && <span className="ds-agency">{p.agency.replace(/[()]/g, '').trim()}</span>}
                   <span><CalendarClock size={14} aria-hidden="true" /> Driver: {p.primary_risk_driver || 'not reported'}</span>
                 </div>
+                {p.source_pdf && <a className="text-link" href={`/api/projects/${encodeURIComponent(p.project_code)}/source#page=${encodeURIComponent(p.source_page || 1)}`} target="_blank" rel="noreferrer">
+                  <FileText size={14} aria-hidden="true" /> Source: {p.source_pdf.split(/[\\/]/).pop()} · page {p.source_page || 'not recorded'}
+                </a>}
+                {p.quality_status && <p><span className={`ln-status ${p.quality_status === 'VERIFIED' ? 'status-built' : 'status-partial'}`}>{p.quality_status === 'VERIFIED' ? 'Source row verified' : 'Review required'}</span></p>}
+                {p.quality_warnings && <p className="ds-fineprint">Review flags: {Array.isArray(p.quality_warnings) ? p.quality_warnings.join(' · ') : p.quality_warnings}</p>}
               </div>
               <ScoreDial score={p.risk_score} band={p.risk_band} />
             </div>
@@ -239,7 +247,7 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
             <div className="ds-vital">
               <span className="ds-vital-label">Physical progress</span>
               <strong className="ln-num"><CountUp value={p.physical_progress_pct ?? 0} decimals={1} suffix="%" /></strong>
-              <span className="ds-vital-note">{num1(p.progress_gap, ' pts')} vs linear plan</span>
+              <span className="ds-vital-note">{num1(p.progress_gap, ' pts')} vs approval timeline proxy</span>
             </div>
             <div className="ds-vital">
               <span className="ds-vital-label">Spent to date</span>
@@ -253,9 +261,8 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
             <section className="ds-block ds-split">
               <div>
                 <p className="ln-eyebrow"><span className="ln-idx">01</span> Why this score</p>
-                <h2 className="ln-h3" style={{ marginTop: '1rem' }}>Four capped signals, open arithmetic.</h2>
-                <p className="ln-body">The rule score is five weighted signals — the fifth, revision count, is not in this
-                  snapshot. Each signal is capped so one runaway number cannot dominate. <Link href="/about#reading-risk" onClick={onClose} className="text-link">How scores work <ArrowUpRight size={13} /></Link></p>
+                <h2 className="ln-h3" style={{ marginTop: '1rem' }}>Five capped signals, open arithmetic.</h2>
+                <p className="ln-body">Missing inputs stay unknown; the score renormalizes across available signals. This record has {num1(p.risk_coverage_pct, '%')} of its weighted inputs available. <Link href="/about#reading-risk" onClick={onClose} className="text-link">How scores work <ArrowUpRight size={13} /></Link></p>
               </div>
               <div className="ds-signals">
                 {signals.map((s) => <SignalBar key={s.label} {...s} />)}
@@ -268,12 +275,8 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
                 <div>
                   <p className="ln-eyebrow"><span className="ln-idx">02</span> The model&rsquo;s say</p>
                   <h2 className="ln-h3" style={{ marginTop: '1rem' }}>What might change next report?</h2>
-                  <p className="ln-body">Gradient boosting, trained on {metrics.months.length} monthly reports and tested on a later
-                    month it never saw (ROC-AUC {metrics.schedule_slipped_label.temporal_split.gradient_boosting.roc_auc.toFixed(2)}).
-                    An estimate to triage attention — not a confirmed forecast.</p>
-                  <p className="ds-fineprint">Cost-model output: {num1(p.cost_revised_up_risk_pct, '%')} — not reliable for
-                    forecasting (later-month ROC-AUC {metrics.cost_revised_up_label.temporal_split.gradient_boosting.roc_auc.toFixed(2)}).
-                    Probabilities are uncalibrated; read them as ranking, not frequency.</p>
+                  <p className="ln-body">{metrics.schedule_slipped_label.selected_model.replaceAll('_', ' ')}, trained on {metrics.months.length} monthly reports and tested on up to three later reports, using earlier months for training (mean ROC-AUC {metrics.schedule_slipped_label.temporal_split[metrics.schedule_slipped_label.selected_model].roc_auc.toFixed(2)}). A preliminary ranking signal for review — not a confirmed forecast.</p>
+                  <p className="ds-fineprint">Cost-model score: {num1(p.cost_revised_up_risk_pct)} / 100 — not reliable for forecasting (ordered ROC-AUC {metrics.cost_revised_up_label.temporal_split[metrics.cost_revised_up_label.selected_model].roc_auc.toFixed(2)}). Both raw scores are uncalibrated; read them as rankings, not event frequencies.</p>
                 </div>
                 <SlipGauge pct={p.schedule_slipped_risk_pct} />
               </div>

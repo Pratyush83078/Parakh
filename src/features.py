@@ -8,15 +8,18 @@ def month_diff(d1, d2):
 
 def add_snapshot_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    df["planned_duration_m"] = df.apply(
-        lambda r: month_diff(r["start_date"], r["target_doc"]), axis=1)
-    df["age_m"] = df.apply(
-        lambda r: month_diff(r["start_date"], r["report_month_dt"]), axis=1)
+    # These reports provide approval dates consistently, but not construction
+    # start dates. Keep that distinction visible in feature names and use the
+    # approval date only as a documented timeline proxy.
+    df["months_since_approval"] = df.apply(
+        lambda r: month_diff(r["approval_date"], r["report_month_dt"]), axis=1)
+    df["approval_to_target_m"] = df.apply(
+        lambda r: month_diff(r["approval_date"], r["target_doc"]), axis=1)
 
-    # Avoid division by zero when start_date == target_doc or duration <= 0
-    safe_duration = df["planned_duration_m"].replace(0, np.nan).clip(lower=1)
-    df["elapsed_frac"] = (df["age_m"] / safe_duration).clip(lower=0, upper=10.0)
-    df["expected_progress_pct"] = (df["elapsed_frac"] * 100).clip(upper=100.0)
+    # A simple linear timeline proxy, not a contractual baseline schedule.
+    safe_duration = df["approval_to_target_m"].replace(0, np.nan).clip(lower=1)
+    df["approval_elapsed_frac"] = (df["months_since_approval"] / safe_duration).clip(lower=0, upper=10.0)
+    df["expected_progress_pct"] = (df["approval_elapsed_frac"] * 100).clip(upper=100.0)
     df["progress_gap"] = df["physical_progress_pct"] - df["expected_progress_pct"]
 
     # Safe cost ratios
@@ -40,8 +43,9 @@ def add_snapshot_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def add_velocity_features(df: pd.DataFrame, window: int = 3) -> pd.DataFrame:
-    df = df.sort_values(["project_code", "report_month_dt"]).copy()
-    g = df.groupby("project_code")
+    identity = "project_key" if "project_key" in df else "project_code"
+    df = df.sort_values([identity, "report_month_dt"]).copy()
+    g = df.groupby(identity)
 
     df["progress_pct_prev"] = g["physical_progress_pct"].shift(window)
     df["progress_velocity"] = (
@@ -76,28 +80,44 @@ def add_velocity_features(df: pd.DataFrame, window: int = 3) -> pd.DataFrame:
 def compute_risk_score(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
-    # Calibrated risk components bounded 0 to 1 based on real infrastructure thresholds:
+    # Explainable rule components bounded 0 to 1 using explicit thresholds.
     # 1. Cost overrun ratio: 0% to 50%+ escalation
-    cost_risk = (df["cost_overrun_ratio_so_far"].clip(lower=0, upper=0.50) / 0.50).fillna(0)
+    cost_risk = (df["cost_overrun_ratio_so_far"].clip(lower=0, upper=0.50) / 0.50)
     # 2. Schedule slip: 0 to 36 months of delay
-    schedule_risk = (df["doc_slip_months_so_far"].clip(lower=0, upper=36) / 36.0).fillna(0)
+    schedule_risk = (df["doc_slip_months_so_far"].clip(lower=0, upper=36) / 36.0)
     # 3. Physical progress gap: negative gap (behind expected progress) 0 to 40%
-    progress_risk = ((-df["progress_gap"]).clip(lower=0, upper=40) / 40.0).fillna(0)
+    progress_risk = ((-df["progress_gap"]).clip(lower=0, upper=40) / 40.0)
     # 4. Expenditure ahead of progress: expenditure util exceeding progress by 0 to 40%
-    spend_risk = (df["spend_vs_progress_gap"].clip(lower=0, upper=40) / 40.0).fillna(0)
+    spend_risk = (df["spend_vs_progress_gap"].clip(lower=0, upper=40) / 40.0)
     # 5. Repeated project timeline / budget revisions: 0 to 3+ revisions
     revisions_total = df["cost_revision_count_cum"].fillna(0) + df["doc_revision_count_cum"].fillna(0)
     revision_risk = (revisions_total.clip(upper=3) / 3.0)
 
-    # Weighted composite score (0 to 100)
-    df["risk_score"] = 100.0 * (
-        0.30 * cost_risk +
-        0.25 * schedule_risk +
-        0.20 * progress_risk +
-        0.15 * spend_risk +
-        0.10 * revision_risk
-    )
+    # Keep missing signals unknown. Renormalize the documented weights over
+    # observed components and publish coverage so a missing revised cost cannot
+    # silently become zero cost risk.
+    weights = {
+        "Cost Escalation": 0.30,
+        "Schedule Delay": 0.25,
+        "Slow Physical Progress": 0.20,
+        "Excessive Expenditure": 0.15,
+        "Repeated Revisions": 0.10,
+    }
+    components = pd.DataFrame({
+        "Cost Escalation": cost_risk,
+        "Schedule Delay": schedule_risk,
+        "Slow Physical Progress": progress_risk,
+        "Excessive Expenditure": spend_risk,
+        "Repeated Revisions": revision_risk,
+    }, index=df.index)
+    weights_by_component = pd.Series(weights)
+    observed_weight = components.notna().mul(weights_by_component).sum(axis=1)
+    weighted_risk = components.fillna(0).mul(weights_by_component).sum(axis=1)
+    df["risk_coverage_pct"] = (observed_weight / sum(weights.values()) * 100).round(1)
+    df["risk_score"] = (100.0 * weighted_risk / observed_weight.replace(0, np.nan))
     df["risk_score"] = df["risk_score"].round(1)
+    if "scoring_eligible" in df:
+        df.loc[~df["scoring_eligible"].fillna(False), "risk_score"] = np.nan
 
     df["risk_band"] = pd.cut(
         df["risk_score"],
@@ -106,18 +126,13 @@ def compute_risk_score(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Identify primary risk driver for dashboard explainability
-    risk_matrix = pd.DataFrame({
-        "Cost Escalation": cost_risk * 0.30,
-        "Schedule Delay": schedule_risk * 0.25,
-        "Slow Physical Progress": progress_risk * 0.20,
-        "Excessive Expenditure": spend_risk * 0.15,
-        "Repeated Revisions": revision_risk * 0.10,
-    })
+    risk_matrix = components.mul(weights_by_component)
     df["primary_risk_driver"] = risk_matrix.idxmax(axis=1)
+    if "scoring_eligible" in df:
+        df.loc[~df["scoring_eligible"].fillna(False), "primary_risk_driver"] = None
 
     return df
 
 def add_sector_dummies(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.get_dummies(df, columns=["sector"], prefix="sector", dummy_na=True)
     return df
-

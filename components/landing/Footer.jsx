@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
-import { monthLabel } from './Hero';
+import { monthLabel } from '@/lib/monthLabel';
 
 export default function Footer({ metrics }) {
   const wordRef = useRef(null);

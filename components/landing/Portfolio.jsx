@@ -1,10 +1,11 @@
 'use client';
+import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 import CountUp from '@/components/motion/CountUp';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
-import { monthLabel } from './Hero';
+import { monthLabel } from '@/lib/monthLabel';
 
 const nf = new Intl.NumberFormat('en-IN');
 const BANDS = ['Low', 'Medium', 'High', 'Critical'];
@@ -32,6 +33,7 @@ export default function Portfolio({ kpis }) {
 
   return (
     <section id="portfolio" className="ln-section" ref={ref}>
+      <GhostWord word="Risk" side="right" />
       <div className="ln-wrap">
         <Reveal className="ln-section-head">
           <p className="ln-eyebrow"><span className="ln-idx">03</span> The portfolio</p>

@@ -1,4 +1,5 @@
 'use client';
+import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { FileText, Table2, Calculator, LineChart } from 'lucide-react';
@@ -8,8 +9,8 @@ import { Reveal, SplitWords } from '@/components/motion/Reveal';
 const nf = new Intl.NumberFormat('en-IN');
 
 const PIPELINE = [
-  { icon: FileText, title: 'Read the PDF', body: 'Pull every project row out of each monthly Flash Report with coordinate extraction.', file: 'src/pdf_extracter.py' },
-  { icon: Table2, title: 'Clean and join months', body: 'Fix glued cells, recover project codes, reconcile totals against MoSPI.', file: 'src/data_loader.py' },
+  { icon: FileText, title: 'Read the PDF', body: 'Find report tables from their headings and structure, then retain the source PDF and page for each extracted row.', file: 'src/pdf_extracter.py' },
+  { icon: Table2, title: 'Check and join records', body: 'Normalize fields, preserve parseable warnings, and reconcile report totals where official figures are available.', file: 'src/data_loader.py' },
   { icon: Calculator, title: 'Score and label', body: 'Open rule score for today; label what actually changed in the next report.', file: 'src/features.py · labels.py' },
   { icon: LineChart, title: 'Train and publish', body: 'Compare models against the rule score, export the snapshot this site reads.', file: 'src/model_train.py' },
 ];
@@ -25,22 +26,29 @@ const WEIGHTS = [
 
 export default function Method({ kpis, monthsCount }) {
   const weightsRef = useRef(null);
+  const wMax = Math.max(...WEIGHTS.map((w) => w.w));
 
   useGSAP(() => {
     if (prefersReducedMotion()) return;
-    // The bar fill lives in a ::after keyed to --fill, so tween the CSS var on the element.
+    // Fill is proportional to the real weight (30/25/20/15/10 → 100/83/67/50/33%)
+    // and grows under the reader's hand, like the problem bars above it.
     const bars = weightsRef.current.querySelectorAll('.ln-weight-bar');
-    bars.forEach((bar, i) => {
+    bars.forEach((bar) => {
       gsap.fromTo(bar, { '--fill': '0%' }, {
-        '--fill': `${55 + i * 9}%`,
-        duration: 1.1, delay: i * 0.1, ease: 'power4.out',
-        scrollTrigger: { trigger: weightsRef.current, start: 'top 80%', once: true },
+        '--fill': bar.dataset.fill,
+        ease: 'none',
+        scrollTrigger: { trigger: weightsRef.current, start: 'top 88%', end: 'top 42%', scrub: 0.5 },
       });
+    });
+    gsap.from(weightsRef.current.querySelectorAll('.ln-weight b'), {
+      autoAlpha: 0, y: 12, duration: 0.6, stagger: 0.08,
+      scrollTrigger: { trigger: weightsRef.current, start: 'top 62%', once: true },
     });
   }, { scope: weightsRef });
 
   return (
     <section id="method" className="ln-section">
+      <GhostWord word="Rules" side="left" />
       <div className="ln-wrap">
         <Reveal className="ln-section-head">
           <p className="ln-eyebrow"><span className="ln-idx">02</span> The method</p>
@@ -52,7 +60,7 @@ export default function Method({ kpis, monthsCount }) {
             {kpis?.panel_rows
               ? <> <b className="ln-num">{nf.format(kpis.panel_rows)}</b> project-months across <b className="ln-num">{nf.format(kpis.unique_projects_all_reports)}</b> projects</>
               : ' a project-by-month panel'}.
-            The extract is reconciled against MoSPI&rsquo;s published totals for project count, cost and expenditure.
+            The quality report compares extracted values with published totals where available. A successful parse is not, by itself, a verified record.
           </p>
         </Reveal>
 
@@ -81,9 +89,9 @@ export default function Method({ kpis, monthsCount }) {
             </div>
           </Reveal>
           <div className="ln-weights" role="img" aria-label={WEIGHTS.map((w) => `${w.label} weight ${w.w}`).join(', ')}>
-            {WEIGHTS.map((w, i) => (
+            {WEIGHTS.map((w) => (
               <div key={w.label} style={{ flexGrow: w.w }} className="ln-weight">
-                <span className="ln-weight-bar" style={{ '--fill': `${55 + i * 9}%` }} />
+                <span className="ln-weight-bar" data-fill={`${Math.round((w.w / wMax) * 100)}%`} style={{ '--fill': `${Math.round((w.w / wMax) * 100)}%` }} />
                 <b className="ln-num">{w.w}</b>
                 <span className="ln-weight-label">{w.label}</span>
                 <span className="ln-weight-note">{w.note}</span>

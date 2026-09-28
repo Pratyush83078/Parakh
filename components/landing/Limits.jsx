@@ -6,9 +6,9 @@ const nf = new Intl.NumberFormat('en-IN');
 
 export default function Limits({ kpis, metrics }) {
   const items = [
-    { dt: 'Four months of history', dd: <>Everything is learned from {metrics.months.length} reports. Older PAIMANA reports are the biggest single improvement available, and the pipeline takes them as they are.</> },
+    { dt: `${metrics.months.length} recorded report months`, dd: <>The current source set covers March 2025 through July 2026. New report layouts and rows marked for review still need source-page verification before use.</> },
     { dt: 'Projects that leave the list', dd: <>{kpis ? nf.format(kpis.projects_left_since_first_report) : 'Several hundred'} projects left the report after the first month. A project that finishes never gets a slip label, which biases the training data.</> },
-    { dt: 'Scores rank, they do not promise', dd: <>Model percentages are not calibrated yet. Read 40% as &ldquo;higher than most&rdquo;, not as a 40-in-100 frequency. Calibration is next.</> },
+    { dt: 'Scores rank, they do not promise', dd: <>Model scores are uncalibrated. Read a higher score as a higher ranking, not as an event frequency or a dependable probability.</> },
     { dt: 'A prompt for review, not a verdict', dd: <>Every flag is a reason for an official to look closer. The record shows the source numbers behind it, so the call stays with people.</> },
   ];
 

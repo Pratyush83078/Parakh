@@ -1,11 +1,12 @@
 'use client';
+import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 import AuroraField from '@/components/motion/AuroraField';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
 import CoinFlipScale from '@/components/story/CoinFlipScale';
-import { monthLabel } from './Hero';
+import { monthLabel } from '@/lib/monthLabel';
 
 const nf = new Intl.NumberFormat('en-IN');
 
@@ -15,10 +16,10 @@ const TASKS = [
 ];
 
 function verdictFor(m) {
-  const later = m.temporal_split.gradient_boosting.roc_auc;
-  const rule = m.rule_score_roc_auc;
+  const later = m.temporal_split[m.selected_model].roc_auc;
+  const rule = m.temporal_split.rule_score_roc_auc;
   if (later < 0.55) return { tone: 'bad', text: `Not reliable yet. On a later month it scores ${later.toFixed(2)}, no better than a coin flip.` };
-  if (later >= rule + 0.05) return { tone: 'good', text: `Useful early warning. ${later.toFixed(2)} on a later month, against ${rule.toFixed(2)} for the rule score alone.` };
+  if (later >= rule + 0.05) return { tone: 'good', text: `Preliminary ranking signal. ${later.toFixed(2)} across later-month tests, against ${rule.toFixed(2)} for the rule score alone.` };
   return { tone: 'mid', text: `Close to the rule score (${later.toFixed(2)} vs ${rule.toFixed(2)}). Not yet worth the complexity.` };
 }
 
@@ -57,15 +58,17 @@ export default function Evidence({ metrics }) {
   const scaleRows = TASKS.map(({ key, name, what }) => {
     const m = metrics[key];
     const v = verdictFor(m);
+    const rule = m.temporal_split.rule_score_roc_auc;
+    const later = m.temporal_split[m.selected_model].roc_auc;
     return {
       key,
       name: `${name}: will ${what}?`,
       tone: v.tone,
       verdict: v.text,
       markers: [
-        { kind: 'rule', label: 'Rule score alone', value: m.rule_score_roc_auc },
-        { kind: 'held', label: 'Model, projects it never saw', value: m.group_split.gradient_boosting.roc_auc },
-        { kind: 'later', label: `Model, a later month (${monthLabel(m.temporal_split.test_month, 'short')})`, value: m.temporal_split.gradient_boosting.roc_auc },
+        { kind: 'rule', label: 'Rules, same later month(s)', value: rule },
+        { kind: 'held', label: `${m.selected_model.replaceAll('_', ' ')}, unseen-project mean`, value: m.group_split[m.selected_model].roc_auc },
+        { kind: 'later', label: `Model, later-month mean (through ${monthLabel(m.temporal_split.test_month, 'short')})`, value: later },
       ],
     };
   });
@@ -74,6 +77,7 @@ export default function Evidence({ metrics }) {
 
   return (
     <section id="evidence" ref={root} className="ln-section ln-evidence">
+      <GhostWord word="Proof" side="right" />
       <div className="ln-aurora ln-aurora-dark" aria-hidden="true">
         <AuroraField palette="dark" />
       </div>
@@ -87,10 +91,10 @@ export default function Evidence({ metrics }) {
         <SplitWords as="h2" className="ln-display ln-h2" text="Does machine learning beat the simple rules?" accent={['beat']} />
         <Reveal delay={0.15}>
           <p className="ln-body ln-narrow" style={{ marginTop: '1.4rem' }}>
-            We trained gradient boosting on {metrics.months.length} reports ({monthLabel(metrics.months[0], 'short')} to{' '}
+            We trained the selected model on {metrics.months.length} reports ({monthLabel(metrics.months[0], 'short')} to{' '}
             {monthLabel(metrics.months.at(-1), 'short')}) and tested it two ways: on projects the model never saw —
-            and, the harder test, trained on earlier months and asked to predict a later one. That second test is
-            the one that matches real use.
+            and on up to three later months, with each test month trained only on earlier reports. These ordered tests
+            better match real use. Rare cost increases leave only one recent month with enough events to evaluate.
           </p>
         </Reveal>
 
@@ -108,12 +112,12 @@ export default function Evidence({ metrics }) {
                 <thead>
                   <tr>
                     <th scope="col">Prediction</th>
-                    <th scope="col" className="is-num">Rule score</th>
-                    <th scope="col" className="is-num">LogReg, held-out</th>
-                    <th scope="col" className="is-num">GBoost, held-out</th>
-                    <th scope="col" className="is-num">GBoost, later month</th>
-                    <th scope="col" className="is-num">PR-AUC, later month</th>
-                    <th scope="col" className="is-num">Test positives</th>
+                    <th scope="col" className="is-num">Rules, ordered mean</th>
+                    <th scope="col" className="is-num">LogReg, unseen projects</th>
+                    <th scope="col" className="is-num">GBoost, unseen projects</th>
+                    <th scope="col" className="is-num">Selected model, ordered mean</th>
+                    <th scope="col" className="is-num">PR-AUC / prevalence</th>
+                    <th scope="col" className="is-num">Labeled events</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -122,12 +126,12 @@ export default function Evidence({ metrics }) {
                     return (
                       <tr key={key}>
                         <td>{name}</td>
-                        <td className="is-num ln-num">{m.rule_score_roc_auc.toFixed(2)}</td>
+                        <td className="is-num ln-num">{m.temporal_split.rule_score_roc_auc.toFixed(2)}</td>
                         <td className="is-num ln-num">{m.group_split.logistic_regression.roc_auc.toFixed(2)}</td>
                         <td className="is-num ln-num">{m.group_split.gradient_boosting.roc_auc.toFixed(2)}</td>
-                        <td className="is-num ln-num">{m.temporal_split.gradient_boosting.roc_auc.toFixed(2)}</td>
-                        <td className="is-num ln-num">{m.temporal_split.gradient_boosting.pr_auc.toFixed(2)}</td>
-                        <td className="is-num ln-num">{m.group_split.n_test_positives} of {nf.format(m.group_split.n_test_rows)}</td>
+                        <td className="is-num ln-num">{m.temporal_split[m.selected_model].roc_auc.toFixed(2)} · {m.selected_model.replaceAll('_', ' ')}</td>
+                        <td className="is-num ln-num">{m.temporal_split[m.selected_model].pr_auc.toFixed(2)} / {m.temporal_split[m.selected_model].positive_rate.toFixed(2)}</td>
+                        <td className="is-num ln-num">{nf.format(m.group_split.n_positive_labels)} total</td>
                       </tr>
                     );
                   })}
@@ -135,7 +139,7 @@ export default function Evidence({ metrics }) {
               </table>
             </div>
             <p className="ln-small" style={{ marginTop: '1rem' }}>
-              Held-out test: {slipM.group_split.n_test_projects} projects kept out of training. Horizon: the {metrics.horizon}.
+              Five group-held-out splits report mean ROC-AUC; project groups never cross each split. Ordered metrics average the available later months; compare PR-AUC with the event prevalence beside it. Horizon: the {metrics.horizon}.
               Generated by <code>src/model_train.py</code> into <code>data/processed/model_metrics.json</code>.
             </p>
           </details>
@@ -143,7 +147,7 @@ export default function Evidence({ metrics }) {
 
         <Reveal delay={0.1}>
           <p className="ln-takeaway ln-narrow">
-            The honest pitch: the rule score describes <em>today</em>, the slip model adds a real early warning,
+            The honest pitch: the rule score describes <em>today</em>, the slip model adds a preliminary ranking signal,
             and the cost model needs more history — cost revisions are rare: {costM.group_split.n_test_positives} in
             a test set of {nf.format(costM.group_split.n_test_rows)} project-months.
           </p>

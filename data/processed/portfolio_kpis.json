@@ -1,10 +1,23 @@
 {
   "report_month": "2026-07",
   "total_projects": 1775,
-  "projects_left_since_first_report": 299,
-  "unique_projects_all_reports": 2074,
-  "panel_rows": 7590,
+  "projects_left_since_first_report": 2175,
+  "unique_projects_all_reports": 3950,
+  "panel_rows": 25116,
   "projects_per_month": {
+    "2025-03": 1660,
+    "2025-04": 1653,
+    "2025-05": 1622,
+    "2025-06": 1580,
+    "2025-07": 791,
+    "2025-08": 800,
+    "2025-09": 794,
+    "2025-10": 820,
+    "2025-11": 823,
+    "2025-12": 1392,
+    "2026-01": 1702,
+    "2026-02": 1948,
+    "2026-03": 1941,
     "2026-04": 1981,
     "2026-05": 1987,
     "2026-06": 1847,
@@ -15,16 +28,18 @@
   "total_expenditure_cr": 1926099.57,
   "total_cost_overrun_cr": 481203.81,
   "risk_band_counts": {
-    "Low": 875,
-    "Medium": 742,
-    "High": 144,
-    "Critical": 14
+    "Low": 791,
+    "Medium": 791,
+    "High": 173,
+    "Critical": 20
   },
+  "quality_review_required": 0,
+  "scoring_eligible_projects": 1775,
   "primary_risk_drivers": {
-    "Slow Physical Progress": 840,
-    "Schedule Delay": 605,
-    "Cost Escalation": 262,
-    "Excessive Expenditure": 48,
-    "Repeated Revisions": 20
+    "Slow Physical Progress": 898,
+    "Schedule Delay": 587,
+    "Cost Escalation": 234,
+    "Repeated Revisions": 36,
+    "Excessive Expenditure": 20
   }
 }

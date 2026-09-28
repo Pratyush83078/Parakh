@@ -1,38 +1,17 @@
-# PAIMANA AI — Documentation Hub
-### SIH 2025 Problem Statement 26103 | MoSPI / IPMD
-> **Transforming India's Central Infrastructure Monitoring from Retrospective Reporting into an AI-Powered Predictive Early Warning System.**
+# Documentation
 
----
+Use these maintained documents for the current prototype. Generated metrics and extraction reports in `data/processed/` are the source of exact values.
 
-## 🧭 Documentation Roadmap
+| Document | Purpose |
+|---|---|
+| [Architecture](01_ARCHITECTURE_AND_FLOW.md) | Current PDF-to-dashboard data flow and trust boundaries |
+| [Model methodology](02_MODEL_AND_METHODOLOGY.md) | Rule score, targets, model comparison, evaluation limits |
+| [Dashboard guide](03_DASHBOARD_AND_METRICS_GUIDE.md) | Current routes, fields, evidence links, and metric labels |
+| [Project journey](04_PROJECT_JOURNEY_EXAMPLE.md) | How to inspect a project record and source |
+| [SIH compliance](05_SIH_COMPLIANCE_AND_PITCH.md) | Implemented capabilities and gaps against the problem statement |
+| [Design system](06_DESIGN_SYSTEM.md) | Existing frontend visual tokens and conventions |
+| [Extraction audit](PAIMANA_EXTRACTION_PHASE1_AUDIT.md) | Report inventory, outcomes, warnings, and reconciliation notes |
+| [Findings and roadmap](FINDINGS_AND_ROADMAP.md) | Current evidence and prioritized work |
+| [Pitch brief](SIH26103_PITCH_BRIEF.md) | Claim-safe SIH 26103 summary and evidence |
 
-This documentation suite is organized logically for both **non-technical evaluators** and **developers**. Follow this guide to find what you need:
-
-| # | Document | Best For | What You Will Learn |
-| :---: | :--- | :--- | :--- |
-| **01** | [**System Architecture & Flow**](01_ARCHITECTURE_AND_FLOW.md) | System Architects, Developers | 6-stage ingestion-to-UI pipeline, visual Mermaid flowcharts, scaling to 20 years, and Next.js vs decoupled backend analysis. |
-| **02** | [**ML Model & Methodology**](02_MODEL_AND_METHODOLOGY.md) | Data Scientists, Evaluators | Confirmed target variables, 13 input features, pure math vs ML models, Gradient Boosting vs Logistic Regression metrics (ROC-AUC 0.88), and explainability. |
-| **03** | [**Dashboard & Metrics Guide**](03_DASHBOARD_AND_METRICS_GUIDE.md) | Presenters, Product Managers | Screen-by-screen breakdown of the live web app, all header KPIs, risk band definitions, and deep-dive drawer telemetry. |
-| **04** | [**Project Journey Example**](04_PROJECT_JOURNEY_EXAMPLE.md) | Non-Technical, Interviewers | Step-by-step case study tracing a real project (Anandpur Barrage) from raw PDF line to predictive early-warning alert. |
-| **05** | [**SIH Compliance & Winning Pitch**](05_SIH_COMPLIANCE_AND_PITCH.md) | Hackathon Teams, Presenters | SIH 26103 outcome audit (a through i), what is genuinely working vs future plans, the 4-step winning demo script, and defense against tough judge questions. |
-| **06** | [**Design System Specs**](06_DESIGN_SYSTEM.md) | Frontend Engineers, Designers | Neo-brutalist warm design tokens, CSS variables, typography, and component styling rules. |
-
----
-
-## ⚡ 30-Second Executive Summary
-
-1. **The Problem**: MoSPI monitors **2,059+ central projects costing ₹42.78 Lakh Crore**. Historical monitoring is *retrospective* — overruns and delays are officially acknowledged only after deadlines pass.
-2. **Our Solution**: A **Dual-Engine Platform**:
-   - **Current State Engine (Pure Math)**: 100% transparent, auditable 0–100 composite risk score and primary bottleneck attribution.
-   - **Predictive Early Warning Engine (Gradient Boosting ML)**: Analyzes 13 dynamic signals (like progress stagnation and spend divergence) to forecast cost revisions and schedule slippage 30 days before they happen.
-3. **The Tech Stack**:
-   - Automated PDF parsing: `pdfplumber` (coordinate clustering).
-   - Panel & Feature Engineering: `pandas`, `numpy`, `pyarrow`.
-   - Machine Learning: `scikit-learn` (`GradientBoostingClassifier`, `LogisticRegression`).
-   - Backend API: `Node.js` + `Express` (8 REST endpoints).
-   - Frontend UI: `React 18` + `Vite` + `Recharts` + `Lucide Icons`.
-
----
-
-## 📂 Archival Notes
-Historical planning notes, scratchpads, and early-draft checklists have been safely organized in [`archive/`](archive/).
+Start with the root [README](../README.md) to install and run the prototype. Several older planning and FAQ documents overlap with these maintained references; treat the linked current-status and methodology documents above as authoritative. Kimi design notes are separate frontend references.
