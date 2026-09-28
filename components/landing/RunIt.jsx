@@ -13,7 +13,7 @@ export default function RunIt() {
       <div className="ln-wrap ln-run-grid">
         <div>
           <Reveal className="ln-section-head">
-            <p className="ln-eyebrow"><span className="ln-idx">07</span> Run it yourself</p>
+            <p className="ln-eyebrow"><span className="ln-idx">08</span> Run it yourself</p>
           </Reveal>
           <SplitWords as="h2" className="ln-display ln-h2" text="Open source, end to end." accent={['Open']} />
           <Reveal delay={0.15}>
