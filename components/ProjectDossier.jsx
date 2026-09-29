@@ -8,9 +8,63 @@ import Modal from '@/components/Modal';
 import CountUp from '@/components/motion/CountUp';
 import WhatIfSimulator from '@/components/WhatIfSimulator';
 import metrics from '@/data/processed/model_metrics.json';
+import shapData from '@/data/processed/shap_explanations.json';
 import { cleanState, fmtCr, fmtPct, scoreColor } from '@/lib/api';
 import { monthLabel } from '@/lib/monthLabel';
 import { exportToCsv } from '@/lib/intelligence';
+
+const FEATURE_LABELS = {
+  original_cost_cr: 'Sanctioned cost',
+  months_since_approval: 'Months since approval',
+  approval_to_target_m: 'Approved timeline',
+  approval_elapsed_frac: 'Timeline used so far',
+  progress_gap: 'Progress vs plan',
+  expenditure_util_pct: 'Funds used',
+  spend_vs_progress_gap: 'Spend ahead of work',
+  doc_already_slipped: 'Already delayed',
+  doc_slip_months_so_far: 'Delay so far',
+  progress_velocity: 'Progress speed',
+  cost_revision_count_cum: 'Cost revisions',
+  doc_revision_count_cum: 'Schedule revisions',
+  agency_avg_overrun: 'Agency track record',
+};
+
+/* ── SHAP block: the reasons behind the model number, from TreeExplainer ─── */
+function ShapWhy({ code }) {
+  const entry = shapData.schedule_slipped_label?.[String(code)];
+  if (!entry) return null;
+  const maxAbs = Math.max(...entry.top_drivers.map((d) => Math.abs(d.shap))) || 1;
+  return (
+    <div className="ds-shap">
+      <div className="ds-shap-head">
+        <p className="ds-shap-title">Why the model says this</p>
+        <span className="ds-fineprint">{monthLabel(entry.report_month)} scoring run · model probability {num1(entry.risk_probability * 100, '%')}</span>
+      </div>
+      <ul className="ds-shap-list">
+        {entry.top_drivers.map((d) => (
+          <li key={d.feature} className="ds-shap-row">
+            <span className="ds-shap-name">{FEATURE_LABELS[d.feature] ?? d.feature.replaceAll('_', ' ')}</span>
+            <span className="ds-shap-track" aria-hidden="true">
+              <span
+                className={`ds-shap-fill ${d.shap >= 0 ? 'is-up' : 'is-down'}`}
+                style={{ width: `${Math.round((Math.abs(d.shap) / maxAbs) * 100)}%` }}
+              />
+            </span>
+            <span className={`ds-shap-val ln-num ${d.shap >= 0 ? 'is-up' : 'is-down'}`}>
+              {d.shap >= 0 ? '+' : '−'}{Math.abs(d.shap).toFixed(2)}
+            </span>
+            <span className="ds-shap-obs ln-num">{d.value == null ? '—' : d.value >= 1000 ? nf.format(d.value) : d.value}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="ds-fineprint ds-shap-note">
+        SHAP values from the gradient-boosted trees: how much each input pushed this project&rsquo;s score above or
+        below the portfolio baseline of {num1(100 / (1 + Math.exp(-entry.base_value)), '%')} average risk, in model
+        points, on the latest labeled month. Higher pushes risk up; negative pulls it down.
+      </p>
+    </div>
+  );
+}
 
 const nf = new Intl.NumberFormat('en-IN');
 const num1 = (v, suffix = '') => (v == null ? '—' : `${Number(v).toFixed(1)}${suffix}`);
@@ -277,6 +331,7 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
                 </div>
                 <SlipGauge pct={p.schedule_slipped_risk_pct} />
               </div>
+              <ShapWhy code={p.project_code} />
             </section>
 
             {/* Peers */}

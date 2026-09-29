@@ -87,11 +87,11 @@ export default function Evidence({ metrics }) {
             <div className="ln-table-wrap">
               <table className="ln-table">
                 <thead>
-                  <tr>
-                    <th scope="col">Prediction</th>
+                  <tr>                    <th scope="col">Prediction</th>
                     <th scope="col" className="is-num">Rules, ordered mean</th>
                     <th scope="col" className="is-num">LogReg, unseen projects</th>
                     <th scope="col" className="is-num">GBoost, unseen projects</th>
+                    <th scope="col" className="is-num">XGBoost, unseen projects</th>
                     <th scope="col" className="is-num">Selected model, ordered mean</th>
                     <th scope="col" className="is-num">PR-AUC / prevalence</th>
                     <th scope="col" className="is-num">Labeled events</th>
@@ -106,6 +106,7 @@ export default function Evidence({ metrics }) {
                         <td className="is-num ln-num">{m.temporal_split.rule_score_roc_auc.toFixed(2)}</td>
                         <td className="is-num ln-num">{m.group_split.logistic_regression.roc_auc.toFixed(2)}</td>
                         <td className="is-num ln-num">{m.group_split.gradient_boosting.roc_auc.toFixed(2)}</td>
+                        <td className="is-num ln-num">{m.group_split.xgboost.roc_auc.toFixed(2)}</td>
                         <td className="is-num ln-num">{m.temporal_split[m.selected_model].roc_auc.toFixed(2)} · {m.selected_model.replaceAll('_', ' ')}</td>
                         <td className="is-num ln-num">{m.temporal_split[m.selected_model].pr_auc.toFixed(2)} / {m.temporal_split[m.selected_model].positive_rate.toFixed(2)}</td>
                         <td className="is-num ln-num">{nf.format(m.group_split.n_positive_labels)} total</td>

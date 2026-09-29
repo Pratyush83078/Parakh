@@ -36,7 +36,7 @@ export default function About() {
           <section id="models"><h2>Evidence, not an accuracy headline.</h2>
             <p>Training data covers {metrics.months.length} monthly reports, from {metrics.months[0]} to {metrics.months.at(-1)}. Group-held-out results average five splits with no project crossing train and test. Ordered results average up to three later months, each trained only on earlier reports; rare cost increases leave one recent test month with enough events. These results do not guarantee future performance.</p>
             <div className="ln-table-wrap"><table className="ln-table model-table"><caption>Generated evaluation · ROC-AUC (higher is better; 0.5 is chance ranking)</caption><thead><tr><th scope="col">Target / model</th><th scope="col">Unseen projects, mean</th><th scope="col">Ordered months, mean</th><th scope="col">PR-AUC / event rate</th><th scope="col">PR lift vs event rate</th></tr></thead><tbody>
-              {[['schedule_slipped_label', 'Schedule slip'], ['cost_revised_up_label', 'Cost revision']].flatMap(([key, label]) => [['logistic_regression', 'Logistic regression'], ['gradient_boosting', 'Gradient boosting']].map(([model, name]) => <tr key={`${key}-${model}`}><td><strong>{label}</strong><span className="cell-primary ln-muted">{name}{metrics[key].selected_model === model ? ' · selected' : ''}</span></td><td className="ln-num">{metrics[key].group_split[model].roc_auc.toFixed(3)}</td><td className="ln-num">{metrics[key].temporal_split[model].roc_auc.toFixed(3)}</td><td className="ln-num">{metrics[key].temporal_split[model].pr_auc.toFixed(3)} / {metrics[key].temporal_split[model].positive_rate.toFixed(3)}</td><td className="ln-num">{metrics[key].temporal_split[model].pr_lift_over_prevalence.toFixed(2)}×</td></tr>))}
+              {[['schedule_slipped_label', 'Schedule slip'], ['cost_revised_up_label', 'Cost revision']].flatMap(([key, label]) => [['logistic_regression', 'Logistic regression'], ['gradient_boosting', 'Gradient boosting'], ['xgboost', 'XGBoost']].map(([model, name]) => <tr key={`${key}-${model}`}><td><strong>{label}</strong><span className="cell-primary ln-muted">{name}{metrics[key].selected_model === model ? ' · selected' : ''}</span></td><td className="ln-num">{metrics[key].group_split[model].roc_auc.toFixed(3)}</td><td className="ln-num">{metrics[key].temporal_split[model].roc_auc.toFixed(3)}</td><td className="ln-num">{metrics[key].temporal_split[model].pr_auc.toFixed(3)} / {metrics[key].temporal_split[model].positive_rate.toFixed(3)}</td><td className="ln-num">{metrics[key].temporal_split[model].pr_lift_over_prevalence.toFixed(2)}×</td></tr>))}
             </tbody></table></div>
             <h3>Signals used by the selected models</h3>
             <p>Permutation importance shows how much test-set PR-AUC changed when one input was shuffled. It describes portfolio-level predictive signal, not a cause or an explanation for one project.</p>
@@ -47,6 +47,20 @@ export default function About() {
                 return <tr key={key}><th scope="row">{label}</th><td>{target.selected_model.replaceAll('_', ' ')}</td><td>{signals.length ? signals.map(([feature, value]) => `${feature.replaceAll('_', ' ')} (+${value.toFixed(3)} PR-AUC)`).join(' · ') : 'Not enough positive test cases to estimate'}</td></tr>;
               })}
             </tbody></table></div>
+            {['schedule_slipped_label', 'cost_revised_up_label'].map((key) => {
+              const shap = metrics[key]?.temporal_split?.shap_global_importance || {};
+              if (!Object.keys(shap).length) return null;
+              const total = Object.values(shap).reduce((s, v) => s + v, 0) || 1;
+              return (
+                <div key={`${key}-shap`}>
+                  <h3>What the {metrics[key].selected_model.replaceAll('_', ' ')} model weighs — global mean |SHAP|</h3>
+                  <p>Average absolute contribution of each input to the score across all projects in the latest labeled month, read from the production gradient-boosted trees with SHAP. Compare shares, not causes: SHAP explains the model, not the project.</p>
+                  <div className="ln-table-wrap"><table className="ln-table model-table"><thead><tr><th scope="col">Signal</th><th scope="col" className="ln-num">Mean |SHAP|</th><th scope="col" className="ln-num">Share of explained</th></tr></thead><tbody>
+                    {Object.entries(shap).map(([feature, value]) => <tr key={feature}><td>{feature.replaceAll('_', ' ')}</td><td className="ln-num">{value.toFixed(3)}</td><td className="ln-num">{(value / total * 100).toFixed(1)}%</td></tr>)}
+                  </tbody></table></div>
+                </div>
+              );
+            })}
             <p className="workspace-note">Verified training cohort: schedule slip {metrics.schedule_slipped_label.group_split.n_rows_used.toLocaleString()} rows / {metrics.schedule_slipped_label.group_split.n_projects_used.toLocaleString()} projects; cost revision {metrics.cost_revised_up_label.group_split.n_positive_labels} positive events. Latest ordered test month: {metrics.schedule_slipped_label.temporal_split.test_month}. Model probabilities are not calibrated. Source: <code>data/processed/model_metrics.json</code>.</p>
             <p>ROC-AUC measures ranking, not “percent correct.” PR-AUC is shown beside the event rate because positive events are rare. Rule-score comparisons and more detail are available in the <Link href="/#evidence">overview evidence section</Link>.</p>
           </section>

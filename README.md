@@ -13,6 +13,7 @@ The repository contains all 17 source PDFs currently used by the prototype, cove
 Requirements: Python 3.9+ and Node.js 20+.
 
 ```bash
+git clone --depth 1 https://github.com/Pratyush83078/Parakh.git
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt

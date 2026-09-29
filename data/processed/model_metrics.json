@@ -80,6 +80,18 @@
           "pr_lift_over_prevalence_std": 0.84,
           "brier_score": 0.013,
           "brier_score_std": 0.002
+        },
+        "xgboost": {
+          "roc_auc": 0.772,
+          "roc_auc_std": 0.029,
+          "pr_auc": 0.049,
+          "pr_auc_std": 0.014,
+          "positive_rate": 0.01,
+          "positive_rate_std": 0.001,
+          "pr_lift_over_prevalence": 4.732,
+          "pr_lift_over_prevalence_std": 1.449,
+          "brier_score": 0.01,
+          "brier_score_std": 0.001
         }
       },
       "rule_score": {
@@ -116,6 +128,18 @@
         "brier_score": 0.013,
         "brier_score_std": 0.002
       },
+      "xgboost": {
+        "roc_auc": 0.772,
+        "roc_auc_std": 0.029,
+        "pr_auc": 0.049,
+        "pr_auc_std": 0.014,
+        "positive_rate": 0.01,
+        "positive_rate_std": 0.001,
+        "pr_lift_over_prevalence": 4.732,
+        "pr_lift_over_prevalence_std": 1.449,
+        "brier_score": 0.01,
+        "brier_score_std": 0.001
+      },
       "rule_score_roc_auc": 0.57
     },
     "temporal_split": {
@@ -148,6 +172,13 @@
           "positive_rate": 0.042,
           "pr_lift_over_prevalence": 1.83,
           "brier_score": 0.043
+        },
+        "xgboost": {
+          "roc_auc": 0.81,
+          "pr_auc": 0.119,
+          "positive_rate": 0.042,
+          "pr_lift_over_prevalence": 2.87,
+          "brier_score": 0.04
         }
       },
       "rule_score": {
@@ -170,6 +201,13 @@
         "pr_lift_over_prevalence": 1.83,
         "brier_score": 0.043
       },
+      "xgboost": {
+        "roc_auc": 0.81,
+        "pr_auc": 0.119,
+        "positive_rate": 0.042,
+        "pr_lift_over_prevalence": 2.87,
+        "brier_score": 0.04
+      },
       "rule_score_roc_auc": 0.586,
       "selected_model_permutation_importance": {
         "months_since_approval": 0.0961,
@@ -180,12 +218,14 @@
         "spend_vs_progress_gap": 0.0042,
         "progress_velocity": 0.0042,
         "doc_already_slipped": 0.0007
-      }
+      },
+      "shap_global_importance": {},
+      "xgboost_early_stopping_rounds": 40
     }
   },
   "schedule_slipped_label": {
     "n_rows_excluded_unverified_or_ineligible": 635,
-    "selected_model": "gradient_boosting",
+    "selected_model": "xgboost",
     "features": [
       "original_cost_cr",
       "months_since_approval",
@@ -234,6 +274,18 @@
           "pr_lift_over_prevalence_std": 0.212,
           "brier_score": 0.083,
           "brier_score_std": 0.004
+        },
+        "xgboost": {
+          "roc_auc": 0.862,
+          "roc_auc_std": 0.006,
+          "pr_auc": 0.587,
+          "pr_auc_std": 0.028,
+          "positive_rate": 0.134,
+          "positive_rate_std": 0.008,
+          "pr_lift_over_prevalence": 4.37,
+          "pr_lift_over_prevalence_std": 0.208,
+          "brier_score": 0.08,
+          "brier_score_std": 0.003
         }
       },
       "rule_score": {
@@ -269,6 +321,18 @@
         "pr_lift_over_prevalence_std": 0.212,
         "brier_score": 0.083,
         "brier_score_std": 0.004
+      },
+      "xgboost": {
+        "roc_auc": 0.862,
+        "roc_auc_std": 0.006,
+        "pr_auc": 0.587,
+        "pr_auc_std": 0.028,
+        "positive_rate": 0.134,
+        "positive_rate_std": 0.008,
+        "pr_lift_over_prevalence": 4.37,
+        "pr_lift_over_prevalence_std": 0.208,
+        "brier_score": 0.08,
+        "brier_score_std": 0.003
       },
       "rule_score_roc_auc": 0.526
     },
@@ -336,6 +400,18 @@
           "pr_lift_over_prevalence_std": 0.268,
           "brier_score": 0.13,
           "brier_score_std": 0.022
+        },
+        "xgboost": {
+          "roc_auc": 0.787,
+          "roc_auc_std": 0.009,
+          "pr_auc": 0.391,
+          "pr_auc_std": 0.059,
+          "positive_rate": 0.181,
+          "positive_rate_std": 0.039,
+          "pr_lift_over_prevalence": 2.183,
+          "pr_lift_over_prevalence_std": 0.163,
+          "brier_score": 0.127,
+          "brier_score_std": 0.018
         }
       },
       "rule_score": {
@@ -372,17 +448,45 @@
         "brier_score": 0.13,
         "brier_score_std": 0.022
       },
+      "xgboost": {
+        "roc_auc": 0.787,
+        "roc_auc_std": 0.009,
+        "pr_auc": 0.391,
+        "pr_auc_std": 0.059,
+        "positive_rate": 0.181,
+        "positive_rate_std": 0.039,
+        "pr_lift_over_prevalence": 2.183,
+        "pr_lift_over_prevalence_std": 0.163,
+        "brier_score": 0.127,
+        "brier_score_std": 0.018
+      },
       "rule_score_roc_auc": 0.566,
       "selected_model_permutation_importance": {
-        "approval_elapsed_frac": 0.1257,
-        "progress_gap": 0.068,
-        "doc_revision_count_cum": 0.0501,
-        "expenditure_util_pct": 0.0407,
-        "doc_slip_months_so_far": 0.0228,
-        "approval_to_target_m": 0.0152,
-        "months_since_approval": 0.0056,
-        "progress_velocity": 0.0049
-      }
+        "approval_elapsed_frac": 0.1443,
+        "progress_gap": 0.0635,
+        "doc_revision_count_cum": 0.0297,
+        "expenditure_util_pct": 0.0271,
+        "doc_slip_months_so_far": 0.02,
+        "original_cost_cr": 0.008,
+        "doc_already_slipped": 0.005,
+        "agency_avg_overrun": 0.004
+      },
+      "shap_global_importance": {
+        "approval_elapsed_frac": 1.0396,
+        "agency_avg_overrun": 0.663,
+        "doc_slip_months_so_far": 0.2868,
+        "spend_vs_progress_gap": 0.1739,
+        "progress_gap": 0.1279,
+        "expenditure_util_pct": 0.1178,
+        "months_since_approval": 0.1104,
+        "approval_to_target_m": 0.11,
+        "original_cost_cr": 0.0826,
+        "doc_already_slipped": 0.0795,
+        "progress_velocity": 0.0719,
+        "doc_revision_count_cum": 0.0528,
+        "cost_revision_count_cum": 0.0001
+      },
+      "xgboost_early_stopping_rounds": 40
     }
   }
 }

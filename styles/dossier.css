@@ -221,6 +221,25 @@ dialog.dossier-dialog::-webkit-scrollbar-thumb { background: var(--ln-scrollbar)
 .dossier-root .sensitivity-tool p, .dossier-root .workspace-note { font-size: 0.78rem; line-height: 1.65; color: var(--ln-ink-60); }
 .dossier-root .sensitivity-result output { font-family: var(--font-mono); font-weight: 620; }
 
+/* ── SHAP: why the model says this ───────────────────────────────────────── */
+.ds-shap { margin-top: clamp(1.4rem, 3vw, 2.2rem); padding-top: clamp(1.2rem, 2.5vw, 1.8rem); border-top: 1px dashed var(--ln-hairline); }
+.ds-shap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+.ds-shap-title { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 650; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ln-blue); margin: 0; }
+.ds-shap-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+.ds-shap-row { display: grid; grid-template-columns: minmax(9.5rem, 0.9fr) minmax(0, 1.6fr) 3.4rem 4.6rem; gap: 0.8rem; align-items: center; }
+.ds-shap-name { font-size: 0.78rem; color: var(--ln-ink-60); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ds-shap-track { height: 6px; border-radius: 99px; background: var(--ln-paper-2); border: 1px solid var(--ln-hairline); overflow: hidden; }
+.ds-shap-fill { display: block; height: 100%; border-radius: 99px; }
+.ds-shap-fill.is-up { background: var(--ln-up); }
+.ds-shap-fill.is-down { background: var(--ln-cyan); }
+.ds-shap-val { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 620; text-align: right; }
+.ds-shap-val.is-up { color: var(--ln-up); }
+.ds-shap-val.is-down { color: var(--ln-cyan); }
+.ds-shap-obs { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ln-ink-35); text-align: right; }
+.ds-shap-note { margin-top: 0.9rem; }
+@media (max-width: 640px) { .ds-shap-row { grid-template-columns: minmax(7.5rem, 1fr) minmax(0, 1.4fr) 3rem; }
+  .ds-shap-obs { display: none; } }
+
 @media (prefers-reduced-motion: reduce) {
   dialog.dossier-dialog { animation: none; }
 }
