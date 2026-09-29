@@ -96,6 +96,14 @@
 }
 [data-theme="light"] .ln-grain { opacity: 0.07; }
 
+/* Light-mode corrections for pieces that were retinted for dark:
+   ghost strokes, skeleton shimmer, table row rules revert to main-branch
+   ink-based values so nothing turns near-invisible on cream. */
+[data-theme="light"] .ln-ghost { -webkit-text-stroke-color: rgba(25, 25, 20, 0.09); }
+[data-theme="light"] .ln-skel { background: linear-gradient(100deg, rgba(25,25,20,0.07) 40%, rgba(25,25,20,0.14) 50%, rgba(25,25,20,0.07) 60%); }
+[data-theme="light"] .ln-table td { border-bottom-color: rgba(25, 25, 20, 0.07); }
+[data-theme="dark"] .ln-btn-ghost:hover { background: rgba(231, 235, 244, 0.06); }
+
 /* Aurora in light mode: softer, warmer tints so the paper stays crisp. */
 [data-theme="light"] .ln-aurora {
   background:

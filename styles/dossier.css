@@ -60,6 +60,11 @@ dialog.dossier-dialog::-webkit-scrollbar-thumb { background: var(--ln-scrollbar)
   -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
 }
+[data-theme="light"] .ds-hero-aurora {
+  background:
+    radial-gradient(42% 60% at 70% 18%, rgba(35, 55, 224, 0.08), transparent 70%),
+    radial-gradient(30% 48% at 18% 70%, rgba(232, 163, 61, 0.10), transparent 70%);
+}
 .ds-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.5fr) auto; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
 @media (max-width: 820px) { .ds-hero-grid { grid-template-columns: 1fr; } }
 

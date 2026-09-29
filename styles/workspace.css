@@ -1,15 +1,17 @@
-/* One visual language: Kimi's blueprint, in working screens — dark techie edition. */
+/* One visual language: Kimi's blueprint, in working screens.
+   Light theme maps to the MAIN-BRANCH dashboard values verbatim, so the
+   working pages are pixel-identical to main when day mode is on. */
 :root[data-theme='light'] {
   --ink: var(--ln-ink);
-  --ink-secondary: var(--ln-ink-60);
-  --ink-muted: var(--ln-ink-35);
+  --ink-secondary: #626158;
+  --ink-muted: #66645a;
   --border-color: var(--ln-hairline);
   --card-bg: var(--ln-card);
   --card-bg-soft: var(--ln-paper-2);
   --surface-soft: var(--ln-paper-2);
   --bg: var(--ln-paper);
-  --ln-ink-60: rgba(231, 235, 244, 0.62);
-  --ln-ink-35: rgba(231, 235, 244, 0.4);
+  --ln-ink-60: #626158;
+  --ln-ink-35: #6d6a60;
 }
 html, body { background: var(--ln-paper); color: var(--ln-ink); }
 html { scroll-padding-top: 110px; }
