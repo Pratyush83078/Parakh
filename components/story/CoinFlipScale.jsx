@@ -26,7 +26,7 @@ export default function CoinFlipScale({ rows }) {
           io.disconnect();
         }
       },
-      { threshold: 0.35 }
+      { threshold: 0.15 }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -36,9 +36,11 @@ export default function CoinFlipScale({ rows }) {
     <figure ref={ref} className={`st-scale ${shown ? 'is-shown' : ''}`}>
       <div className="st-scale-axis" aria-hidden="true">
         {TICKS.map((t) => (
-          <span key={t} style={{ left: pos(t) }} className={t === 0.5 ? 'is-coin' : ''}>
-            {t.toFixed(1)}
-          </span>
+          <div key={t} style={{ left: pos(t) }} className={`st-tick ${t === 0.5 ? 'is-coin' : ''}`}>
+            <span className="st-tick-val">{t.toFixed(1)}</span>
+            {t === 0.5 && <span className="st-tick-sub">Coin Flip</span>}
+            <span className="st-tick-line" />
+          </div>
         ))}
       </div>
 
@@ -48,26 +50,33 @@ export default function CoinFlipScale({ rows }) {
             <h3>{row.name}</h3>
             <p className={`st-verdict tone-${row.tone}`}>{row.verdict}</p>
           </div>
-          <div className="st-track" role="img" aria-label={`${row.name}: ${row.markers.map((m) => `${m.label} ${m.value.toFixed(2)}`).join(', ')}`}>
-            <span className="st-coin-line" style={{ left: pos(0.5) }} />
-            {row.markers.map((m, i) => (
-              <span
-                key={m.kind}
-                className={`st-marker kind-${m.kind}`}
-                style={{
-                  left: shown ? pos(m.value) : pos(0.5),
-                  transitionDelay: `${r * 180 + i * 90}ms`,
-                }}
-              >
-                {m.kind === 'later' && <span className="st-marker-value">{m.value.toFixed(2)}</span>}
-              </span>
-            ))}
+          <div className="st-track-wrap">
+            <div className="st-track" role="img" aria-label={`${row.name}: ${row.markers.map((m) => `${m.label} ${m.value.toFixed(2)}`).join(', ')}`}>
+              <span className="st-coin-line" style={{ left: pos(0.5) }} />
+              {row.markers.map((m, i) => (
+                <span
+                  key={m.kind}
+                  className={`st-marker kind-${m.kind}`}
+                  style={{
+                    left: shown ? pos(m.value) : pos(0.5),
+                    transitionDelay: `${r * 180 + i * 90}ms`,
+                    '--pop-delay': `${r * 180 + i * 90 + 900}ms`,
+                  }}
+                >
+                  {m.kind === 'later' && (
+                    <span className="st-marker-badge">
+                      <span className="st-marker-value">{m.value.toFixed(2)}</span>
+                    </span>
+                  )}
+                </span>
+              ))}
+            </div>
           </div>
           <ul className="st-scale-legend">
             {row.markers.map((m) => (
               <li key={m.kind}>
                 <span className={`st-key kind-${m.kind}`} aria-hidden="true" />
-                <span>{m.label}</span>
+                <span className="st-legend-label">{m.label}</span>
                 <b className="st-num">{m.value.toFixed(2)}</b>
               </li>
             ))}

@@ -4,13 +4,11 @@ import { useRef, useState } from 'react';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 import AuroraField from '@/components/motion/AuroraField';
+import CountUp from '@/components/motion/CountUp';
 import MagneticButton from '@/components/motion/MagneticButton';
 import { fmtCr, cleanState } from '@/lib/api';
 import { monthLabel } from '@/lib/monthLabel';
 
-const nf = new Intl.NumberFormat('en-IN');
-export const lakh = (cr) => (cr == null ? '—' : (cr / 1e5).toFixed(2));
-export { monthLabel };
 const shortMinistry = (m) => (m || '').replace(/^(Ministry|Department) of /, '');
 
 /* ── Proof card: one real flagged project, annotated ─────────────────────── */
@@ -117,13 +115,10 @@ export default function Hero({ kpis, kErr, flagged, flaggedLoading, flaggedError
       scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.6 },
     });
 
-    // Idle breath + pointer tilt on the card. Runs on the card itself so the
-    // scroll scrub (on the wrapper) never fights it for the same property.
+    // Pointer tilt on the card (desktop pointer-fine only).
     const card = root.current.querySelector('.ln-slip');
-    if (card) {
-      gsap.to(card, { y: -9, duration: 2.8, delay: 1.9, yoyo: true, repeat: -1, ease: 'sine.inOut' });
-      if (fine) {
-        gsap.set(card, { transformPerspective: 900 });
+    if (card && fine) {
+      gsap.set(card, { transformPerspective: 900 });
         const rx = gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3.out' });
         const ry = gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3.out' });
         const onTilt = (e) => {
@@ -142,8 +137,7 @@ export default function Hero({ kpis, kErr, flagged, flaggedLoading, flaggedError
           zone.removeEventListener('mouseleave', onFlat);
         };
       }
-    }
-  }, { scope: root });
+    }, { scope: root });
 
   return (
     <section ref={root} className="ln-hero" id="top">
@@ -177,10 +171,10 @@ export default function Hero({ kpis, kErr, flagged, flaggedLoading, flaggedError
               <>The data snapshot did not load. Run <code>python src/run_all.py</code>, then reload.</>
             ) : kpis ? (
               <>
-                The {monthLabel(month)} report lists <b className="ln-num">{nf.format(kpis.total_projects)}</b> projects.
-                Approved at <b className="ln-num">₹{lakh(kpis.total_original_cost_cr)} lakh crore</b>, they now stand
-                at <b className="ln-num">₹{lakh(kpis.total_revised_cost_cr)} lakh crore</b> — up{' '}
-                <b className="ln-num ln-up">{overrunPct.toFixed(1)}%</b>.
+                The {monthLabel(month)} report lists <b className="ln-num"><CountUp value={kpis.total_projects} /></b> projects.
+                Approved at <b className="ln-num">₹<CountUp value={kpis.total_original_cost_cr / 1e5} decimals={2} /> lakh crore</b>, they now stand
+                at <b className="ln-num">₹<CountUp value={kpis.total_revised_cost_cr / 1e5} decimals={2} /> lakh crore</b> — up{' '}
+                <b className="ln-num ln-up"><CountUp value={overrunPct} decimals={1} suffix="%" /></b>.
               </>
             ) : (
               <span className="ln-skel" style={{ width: '80%' }} />

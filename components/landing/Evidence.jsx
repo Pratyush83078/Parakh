@@ -29,13 +29,13 @@ export default function Evidence({ metrics }) {
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
-    // The dark room settles in like a card laid on the desk: slightly small
-    // and rounded while entering, flush and square once you are inside it.
+    // Curtain: the dark room rises and un-clips under your hand — clipped and
+    // slightly small while entering, flush and full-bleed once you are inside.
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       gsap.fromTo(root.current,
-        { scale: 0.955, borderRadius: '2.5rem' },
+        { scale: 0.955, clipPath: 'inset(7% 3% 0% 3% round 2.2rem)' },
         {
-          scale: 1, borderRadius: '0rem', ease: 'none',
+          scale: 1, clipPath: 'inset(0% 0% 0% 0% round 0rem)', ease: 'none',
           scrollTrigger: { trigger: root.current, start: 'top 96%', end: 'top 30%', scrub: true },
         });
     });

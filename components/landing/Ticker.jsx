@@ -24,9 +24,13 @@ export default function Ticker({ kpis }) {
     let speedTarget = 1;
     let skew = 0;
     let skewTarget = 0;
+    let hovering = false;
 
+    // One loop owns timeScale — a separate pause tween would be overwritten
+    // by this ticker on the very next frame. Hover simply lerps speed to 0.
     const settle = () => {
-      speed += (speedTarget - speed) * 0.07;
+      const target = hovering ? 0 : speedTarget;
+      speed += (target - speed) * 0.07;
       skew += (skewTarget - skew) * 0.1;
       skewTarget *= 0.92; // decay back to level between scroll events
       tween.timeScale(speed);
@@ -42,8 +46,8 @@ export default function Ticker({ kpis }) {
       },
     });
 
-    const pause = () => gsap.to(tween, { timeScale: 0, duration: 0.5, overwrite: true });
-    const resume = () => gsap.to(tween, { timeScale: speedTarget, duration: 0.5, overwrite: true });
+    const pause = () => { hovering = true; };
+    const resume = () => { hovering = false; };
     const node = root.current;
     node.addEventListener('mouseenter', pause);
     node.addEventListener('mouseleave', resume);
@@ -71,8 +75,8 @@ export default function Ticker({ kpis }) {
   const row = (key) => (
     <div className="ln-ticker-item" key={key} aria-hidden={key === 'b'}>
       {items.map((it, i) => (
-        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '3.2rem' }}>
-          {it} <span className="ln-dot">◆</span>
+        <span key={i} className="ln-ticker-entry">
+          {it} <span className="ln-dot" aria-hidden="true" />
         </span>
       ))}
     </div>

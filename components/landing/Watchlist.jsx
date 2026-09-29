@@ -87,7 +87,7 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
                     const delay = Math.max(0, p.doc_slip_months_so_far || 0);
                     const costUp = Math.max(0, (p.revised_cost_cr || 0) - (p.original_cost_cr || 0));
                     return (
-                      <tr key={p.project_code}>
+                      <tr key={p.project_code} className={p.risk_band === 'Critical' ? 'ln-row-critical' : undefined}>
                         <td>
                           <button type="button" className="ln-row-link" onClick={() => onInspect(p.project_code)} data-cursor="View">
                             <span className="ln-row-name">{p.project_name}</span>

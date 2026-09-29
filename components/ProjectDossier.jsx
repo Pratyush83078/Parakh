@@ -45,8 +45,8 @@ function ScoreDial({ score, band }) {
         />
       </svg>
       <div className="ds-dial-read">
-        <strong><CountUp value={score ?? 0} decimals={1} /></strong>
-        <span>rule score</span>
+        <strong className="ds-dial-score"><CountUp value={score ?? 0} decimals={1} /></strong>
+        <span className="ds-dial-label">rule score</span>
       </div>
     </div>
   );
@@ -80,8 +80,8 @@ function SlipGauge({ pct }) {
         />
       </svg>
       <div className="ds-gauge-read">
-        <strong><CountUp value={pct ?? 0} decimals={0} /></strong>
-        <span>raw score / 100</span>
+        <strong className="ds-gauge-score"><CountUp value={pct ?? 0} decimals={0} /></strong>
+        <span className="ds-gauge-label">raw score / 100</span>
       </div>
     </div>
   );
@@ -155,7 +155,7 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
     media.add('(prefers-reduced-motion: no-preference)', () => {
       const q = gsap.utils.selector(root);
       const tl = gsap.timeline({ delay: 0.12 });
-      tl.from(q('.ds-topbar'), { yPercent: -100, autoAlpha: 0, duration: 0.55, ease: 'power3.out' }, 0)
+      tl.from(q('.ds-topbar'), { yPercent: -100, opacity: 0, duration: 0.55, ease: 'power3.out' }, 0)
         .from(q('.ds-hero-eyebrow'), { y: 18, autoAlpha: 0, duration: 0.6 }, 0.15)
         .from(q('.ds-hero-title .ln-w-inner'), { yPercent: 115, rotate: 2.5, duration: 1.1, stagger: 0.04, ease: 'power4.out' }, 0.2)
         .from(q('.ds-hero-meta > *'), { y: 16, autoAlpha: 0, duration: 0.6, stagger: 0.07 }, 0.45)
@@ -163,14 +163,15 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
         .from(q('.ds-vitals > *'), { y: 26, autoAlpha: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out' }, 0.55)
         .from(q('.ds-block'), { y: 34, autoAlpha: 0, duration: 0.9, stagger: 0.12, ease: 'power3.out' }, 0.7);
 
-      // The aurora band drifts as the dossier scrolls (internal scroller).
+      // The aurora band drifts as the dossier scrolls.
+      const scrollerEl = root.current?.closest('dialog') || scrollRef.current;
       gsap.to(q('.ds-hero-aurora'), {
         yPercent: 24, ease: 'none',
-        scrollTrigger: { trigger: q('.ds-hero'), start: 'top top', end: 'bottom top', scrub: true, scroller: scrollRef.current },
+        scrollTrigger: { trigger: q('.ds-hero'), start: 'top top', end: 'bottom top', scrub: true, scroller: scrollerEl },
       });
       gsap.to(q('.ds-hero-title'), {
         y: -34, autoAlpha: 0.25, ease: 'none',
-        scrollTrigger: { trigger: q('.ds-hero'), start: 'top top', end: 'bottom top', scrub: true, scroller: scrollRef.current },
+        scrollTrigger: { trigger: q('.ds-hero'), start: 'top top', end: 'bottom top', scrub: true, scroller: scrollerEl },
       });
     });
     return () => media.revert();
@@ -187,7 +188,7 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
 
           {/* Top bar — always in reach */}
           <div className="ds-topbar">
-            <button type="button" className="ds-back" onClick={onClose} data-initial-focus data-cursor>
+            <button type="button" className="ds-back" onClick={onClose} aria-label="Close project record" data-initial-focus autoFocus data-cursor>
               <ArrowLeft size={15} /> {returnLabel}
             </button>
             <div className="ds-topbar-mid">
@@ -276,7 +277,7 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
                   <p className="ln-eyebrow"><span className="ln-idx">02</span> The model&rsquo;s say</p>
                   <h2 className="ln-h3" style={{ marginTop: '1rem' }}>What might change next report?</h2>
                   <p className="ln-body">{metrics.schedule_slipped_label.selected_model.replaceAll('_', ' ')}, trained on {metrics.months.length} monthly reports and tested on up to three later reports, using earlier months for training (mean ROC-AUC {metrics.schedule_slipped_label.temporal_split[metrics.schedule_slipped_label.selected_model].roc_auc.toFixed(2)}). A preliminary ranking signal for review — not a confirmed forecast.</p>
-                  <p className="ds-fineprint">Cost-model score: {num1(p.cost_revised_up_risk_pct)} / 100 — not reliable for forecasting (ordered ROC-AUC {metrics.cost_revised_up_label.temporal_split[metrics.cost_revised_up_label.selected_model].roc_auc.toFixed(2)}). Both raw scores are uncalibrated; read them as rankings, not event frequencies.</p>
+                  <p className="ds-fineprint">Cost-model output · not reliable for forecasting (score: {num1(p.cost_revised_up_risk_pct)} / 100; ordered ROC-AUC {metrics.cost_revised_up_label.temporal_split[metrics.cost_revised_up_label.selected_model].roc_auc.toFixed(2)}). Both raw scores are uncalibrated; read them as rankings, not event frequencies.</p>
                 </div>
                 <SlipGauge pct={p.schedule_slipped_risk_pct} />
               </div>

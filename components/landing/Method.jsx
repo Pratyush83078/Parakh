@@ -4,6 +4,7 @@ import GhostWord from '@/components/motion/GhostWord';
 import { useRef } from 'react';
 import { FileText, Table2, Calculator, LineChart } from 'lucide-react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
+import CountUp from '@/components/motion/CountUp';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
 
 const nf = new Intl.NumberFormat('en-IN');
@@ -92,7 +93,7 @@ export default function Method({ kpis, monthsCount }) {
             {WEIGHTS.map((w) => (
               <div key={w.label} style={{ flexGrow: w.w }} className="ln-weight">
                 <span className="ln-weight-bar" data-fill={`${Math.round((w.w / wMax) * 100)}%`} style={{ '--fill': `${Math.round((w.w / wMax) * 100)}%` }} />
-                <b className="ln-num">{w.w}</b>
+                <b className="ln-num"><CountUp value={w.w} /></b>
                 <span className="ln-weight-label">{w.label}</span>
                 <span className="ln-weight-note">{w.note}</span>
               </div>

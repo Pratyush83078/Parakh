@@ -1116,6 +1116,28 @@
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
 }
 
+/* Settle pulse: one expanding ring as each marker arrives at its value.
+   --pop-delay is set inline per marker (travel delay + 0.85s transition). */
+@media (prefers-reduced-motion: no-preference) {
+  .st-scale.is-shown .st-marker::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    opacity: 0;
+    animation: st-marker-pop 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--pop-delay, 0s) 1 both;
+    pointer-events: none;
+  }
+  .st-marker.kind-rule::after { border-color: #94A3B8; }
+  .st-marker.kind-held::after { border-color: #38BDF8; }
+  .st-marker.kind-later::after { border-color: #10B981; }
+}
+@keyframes st-marker-pop {
+  0% { transform: scale(0.55); opacity: 0.85; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
 .st-marker-value {
   position: absolute;
   top: -24px;

@@ -1,34 +1,52 @@
 'use client';
 
-import { useRef } from 'react';
-import { gsap, useGSAP } from '@/lib/gsap';
+import { useRef, useEffect } from 'react';
+import { gsap, prefersReducedMotion } from '@/lib/gsap';
 
 /**
- * Counts a number up from 0 the first time it scrolls into view.
- * Renders the final value server-side (no-JS safe); the tween only
- * rewrites textContent when motion is allowed.
+ * Counts a number up from 0 the first time it scrolls or opens into view.
+ * Works uniformly in window scrolls, dialogs (ProjectDossier), and drawers.
+ * Renders final value server-side for hydration safety.
  */
 export default function CountUp({ value, decimals = 0, prefix = '', suffix = '', className = '' }) {
   const ref = useRef(null);
-  const final = prefix + Number(value || 0).toFixed(decimals) + suffix;
+  const formatter = new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+  const target = Number(value || 0);
+  const final = prefix + formatter.format(target) + suffix;
 
-  useGSAP(() => {
+  useEffect(() => {
     const el = ref.current;
-    const media = gsap.matchMedia();
-    media.add('(prefers-reduced-motion: no-preference)', () => {
-      const obj = { v: 0 };
-      gsap.to(obj, {
-        v: Number(value || 0),
-        duration: 1.5,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-        onUpdate: () => {
-          el.textContent = prefix + obj.v.toFixed(decimals) + suffix;
-        },
-      });
-    });
-    return () => media.revert();
-  }, [value, decimals, prefix, suffix]);
+    if (!el) return undefined;
+    if (prefersReducedMotion()) return undefined;
+
+    let tween = null;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          const obj = { v: 0 };
+          tween = gsap.to(obj, {
+            v: target,
+            duration: 1.35,
+            ease: 'power2.out',
+            onUpdate: () => {
+              if (el) el.textContent = prefix + formatter.format(obj.v) + suffix;
+            },
+          });
+          io.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      if (tween) tween.kill();
+    };
+  }, [value, decimals, prefix, suffix, target]);
 
   return (
     <span ref={ref} className={className}>

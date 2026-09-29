@@ -37,7 +37,20 @@ function ScrollSync({ children }) {
     gsap.ticker.add(raf);
     // Let fonts + fetched data settle before measuring pins.
     const t = setTimeout(() => ScrollTrigger.refresh(), 700);
+
+    const checkModal = () => {
+      if (document.querySelector('dialog[open]')) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    };
+    checkModal();
+    const observer = new MutationObserver(checkModal);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['open'] });
+
     return () => {
+      observer.disconnect();
       lenis.off('scroll', update);
       gsap.ticker.remove(raf);
       clearTimeout(t);

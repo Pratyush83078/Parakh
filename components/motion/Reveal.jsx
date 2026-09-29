@@ -23,7 +23,7 @@ export function Reveal({ children, className = '', style, delay = 0, y = 30, sta
         delay,
         stagger,
         ease: 'power3.out',
-        scrollTrigger: { trigger: ref.current, start: 'top 82%', once },
+        scrollTrigger: { trigger: ref.current, start: 'top 90%', once },
       });
     });
     return () => media.revert();
@@ -49,7 +49,7 @@ export function SplitWords({ as: Tag = 'h2', text, className = '', accent = [], 
         duration: 1.1,
         stagger: 0.045,
         ease: 'power4.out',
-        scrollTrigger: { trigger: ref.current, start: 'top 85%', once: true },
+        scrollTrigger: { trigger: ref.current, start: 'top 92%', once: true },
       });
     });
     return () => media.revert();

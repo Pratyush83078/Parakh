@@ -11,8 +11,7 @@
 }
 
 html {
-  background: #FFFFFF;
-  background-color: #FFFFFF;
+  /* No hard background here — landing and workspace set their own. */
   color: var(--ink, #0F172A);
   font-family: var(--font-geist-sans), var(--font-body, 'Geist', sans-serif);
   font-size: 15px;
@@ -27,8 +26,8 @@ html {
 }
 
 body {
-  background: #FFFFFF;
-  background-color: #FFFFFF;
+  /* Background intentionally unset: landing page sets --ln-paper cream,
+     workspace sets white. Setting white here would flash on the landing. */
   color: var(--ink, #0F172A);
   min-height: 100vh;
   display: flex;
@@ -52,24 +51,26 @@ main {
 
 /* ── Typography Hierarchy ────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
+  /* Intentionally light defaults — landing overrides with Fraunces,
+     workspace and tables have their own type tokens. */
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   color: var(--ink);
   letter-spacing: -0.02em;
-  text-transform: uppercase;
+  /* No text-transform: uppercase — landing serif headings must stay mixed-case. */
 }
 
-h1 {
+h1:not(.page-intro-title):not(.ds-hero-title):not(.ln-h1):not(.ln-display) {
   font-size: 28px;
   line-height: 1.2;
 }
 
-h2 {
+h2:not(.ln-h2):not(.ln-display) {
   font-size: 22px;
   line-height: 1.25;
 }
 
-h3 {
+h3:not(.ln-h3) {
   font-size: 17px;
   line-height: 1.3;
 }
