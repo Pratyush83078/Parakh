@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowUpRight, Download, MapPin, Building2, CalendarClock, FileText } from 'lucide-react';
 import { gsap, useGSAP } from '@/lib/gsap';
 import Modal from '@/components/Modal';
-import AuroraField from '@/components/motion/AuroraField';
 import CountUp from '@/components/motion/CountUp';
 import WhatIfSimulator from '@/components/WhatIfSimulator';
 import metrics from '@/data/processed/model_metrics.json';
@@ -163,14 +162,10 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
         .from(q('.ds-vitals > *'), { y: 26, autoAlpha: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out' }, 0.55)
         .from(q('.ds-block'), { y: 34, autoAlpha: 0, duration: 0.9, stagger: 0.12, ease: 'power3.out' }, 0.7);
 
-      // The aurora band drifts as the dossier scrolls.
+      // The aurora band drifts as the dossier scrolls (scroll-linked, then done).
       const scrollerEl = root.current?.closest('dialog') || scrollRef.current;
       gsap.to(q('.ds-hero-aurora'), {
         yPercent: 24, ease: 'none',
-        scrollTrigger: { trigger: q('.ds-hero'), start: 'top top', end: 'bottom top', scrub: true, scroller: scrollerEl },
-      });
-      gsap.to(q('.ds-hero-title'), {
-        y: -34, autoAlpha: 0.25, ease: 'none',
         scrollTrigger: { trigger: q('.ds-hero'), start: 'top top', end: 'bottom top', scrub: true, scroller: scrollerEl },
       });
     });
@@ -202,7 +197,7 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
 
           {/* Hero — the case file opens */}
           <header className="ds-hero">
-            <div className="ds-hero-aurora" aria-hidden="true"><AuroraField palette="day" /></div>
+            <div className="ds-hero-aurora" aria-hidden="true" />
             <div className="ds-wrap ds-hero-grid">
               <div>
                 <p className="ln-eyebrow ds-hero-eyebrow">
@@ -212,8 +207,9 @@ export default function ProjectDossier({ project: p, peers, onClose, onOpenPeer,
                 </p>
                 <h1 id="dossier-title" className="ln-display ds-hero-title ln-split" aria-label={p.project_name}>
                   {p.project_name.split(' ').map((w, i, arr) => (
-                    <span key={i} className="ln-w-mask" aria-hidden="true">
-                      <span className="ln-w-inner">{w}{i < arr.length - 1 ? '\u00A0' : ''}</span>
+                    <span key={i} aria-hidden="true">
+                      <span className="ln-w-mask"><span className="ln-w-inner">{w}</span></span>
+                      {i < arr.length - 1 ? ' ' : ''}
                     </span>
                   ))}
                 </h1>

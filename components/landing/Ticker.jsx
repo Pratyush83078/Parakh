@@ -1,66 +1,14 @@
 'use client';
 
-import { useRef } from 'react';
-import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 import metrics from '@/data/processed/model_metrics.json';
 
 /**
  * Vital-signs marquee — real portfolio numbers, duplicated for a seamless loop.
- * GSAP-driven so scroll velocity feeds it: the strip surges and skews while
- * you scroll, then settles back to cruise. Pauses on hover.
+ * Pure CSS animation (compositor-only transform) replaced the old per-frame
+ * GSAP velocity/skew engine: same look, ~zero main-thread cost. CSS pauses
+ * the strip on hover.
  */
 export default function Ticker({ kpis }) {
-  const root = useRef(null);
-  const track = useRef(null);
-
-  useGSAP(() => {
-    // kpis starts null (skeleton render returns no DOM), so re-run when it
-    // lands and guard the refs — a throw here would unmount the whole page.
-    if (prefersReducedMotion() || !track.current || !root.current) return;
-    const el = track.current;
-    const tween = gsap.to(el, { xPercent: -50, ease: 'none', duration: 38, repeat: -1 });
-
-    let speed = 1;
-    let speedTarget = 1;
-    let skew = 0;
-    let skewTarget = 0;
-    let hovering = false;
-
-    // One loop owns timeScale — a separate pause tween would be overwritten
-    // by this ticker on the very next frame. Hover simply lerps speed to 0.
-    const settle = () => {
-      const target = hovering ? 0 : speedTarget;
-      speed += (target - speed) * 0.07;
-      skew += (skewTarget - skew) * 0.1;
-      skewTarget *= 0.92; // decay back to level between scroll events
-      tween.timeScale(speed);
-      gsap.set(el, { skewX: skew });
-    };
-    gsap.ticker.add(settle);
-
-    const st = ScrollTrigger.create({
-      onUpdate(self) {
-        const v = self.getVelocity();
-        speedTarget = gsap.utils.clamp(1, 3.4, 1 + Math.abs(v) / 850);
-        skewTarget = gsap.utils.clamp(-5, 5, v / -420);
-      },
-    });
-
-    const pause = () => { hovering = true; };
-    const resume = () => { hovering = false; };
-    const node = root.current;
-    node.addEventListener('mouseenter', pause);
-    node.addEventListener('mouseleave', resume);
-
-    return () => {
-      gsap.ticker.remove(settle);
-      st.kill();
-      tween.kill();
-      node.removeEventListener('mouseenter', pause);
-      node.removeEventListener('mouseleave', resume);
-    };
-  }, { scope: root, dependencies: [kpis] });
-
   if (!kpis) return null;
   const nf = new Intl.NumberFormat('en-IN');
   const bands = kpis.risk_band_counts || {};
@@ -82,8 +30,8 @@ export default function Ticker({ kpis }) {
     </div>
   );
   return (
-    <div ref={root} className="ln-ticker" aria-label="Portfolio vital signs">
-      <div ref={track} className="ln-ticker-track">{row('a')}{row('b')}</div>
+    <div className="ln-ticker" aria-label="Portfolio vital signs">
+      <div className="ln-ticker-track">{row('a')}{row('b')}</div>
     </div>
   );
 }

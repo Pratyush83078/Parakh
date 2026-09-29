@@ -3,7 +3,6 @@
 import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
-import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
 import MagneticButton from '@/components/motion/MagneticButton';
 
 const LINKS = [
@@ -14,23 +13,28 @@ const LINKS = [
 ];
 
 export default function LandingNav() {
-  const ref = useRef(null);
   const [scrolled, setScrolled] = useState(false);
+  const raf = useRef(0);
 
+  // rAF-throttled scroll flag — one boolean, no layout reads in the handler.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      if (raf.current) return;
+      raf.current = requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 40);
+        raf.current = 0;
+      });
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf.current);
+    };
   }, []);
 
-  useGSAP(() => {
-    if (prefersReducedMotion()) return;
-    gsap.from(ref.current, { yPercent: -110, duration: 1.1, delay: 0.15, ease: 'power4.out' });
-  }, { scope: ref });
-
   return (
-    <nav ref={ref} className={`ln-nav ${scrolled ? 'is-scrolled' : ''}`} aria-label="Landing">
+    <nav className={`ln-nav ${scrolled ? 'is-scrolled' : ''}`} aria-label="Landing">
       <div className="ln-wrap ln-nav-row">
         <Link href="/" className="ln-brand" data-cursor>
           <span className="ln-brand-deva" lang="hi">परख</span>

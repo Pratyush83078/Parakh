@@ -3,7 +3,6 @@ import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
-import AuroraField from '@/components/motion/AuroraField';
 import { Reveal, SplitWords } from '@/components/motion/Reveal';
 import CoinFlipScale from '@/components/story/CoinFlipScale';
 import { monthLabel } from '@/lib/monthLabel';
@@ -25,34 +24,16 @@ function verdictFor(m) {
 
 export default function Evidence({ metrics }) {
   const root = useRef(null);
-  const spot = useRef(null);
 
   useGSAP(() => {
-    const mm = gsap.matchMedia();
-    // Curtain: the dark room rises and un-clips under your hand — clipped and
-    // slightly small while entering, flush and full-bleed once you are inside.
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.fromTo(root.current,
-        { scale: 0.955, clipPath: 'inset(7% 3% 0% 3% round 2.2rem)' },
-        {
-          scale: 1, clipPath: 'inset(0% 0% 0% 0% round 0rem)', ease: 'none',
-          scrollTrigger: { trigger: root.current, start: 'top 96%', end: 'top 30%', scrub: true },
-        });
-    });
-    // A quiet torch of blue light follows the pointer across the dark.
-    mm.add('(prefers-reduced-motion: no-preference) and (pointer: fine)', () => {
-      gsap.set(spot.current, { xPercent: -50, yPercent: -50 });
-      const xTo = gsap.quickTo(spot.current, 'x', { duration: 0.8, ease: 'power3.out' });
-      const yTo = gsap.quickTo(spot.current, 'y', { duration: 0.8, ease: 'power3.out' });
-      const move = (e) => {
-        const r = root.current.getBoundingClientRect();
-        xTo(e.clientX - r.left);
-        yTo(e.clientY - r.top);
-      };
-      root.current.addEventListener('mousemove', move, { passive: true });
-      return () => root.current.removeEventListener('mousemove', move);
-    });
-    return () => mm.revert();
+    if (prefersReducedMotion()) return;
+    // Curtain: the dark room un-clips once as it enters (scroll-linked, then done).
+    gsap.fromTo(root.current,
+      { clipPath: 'inset(6% 2.5% 0% 2.5% round 2rem)' },
+      {
+        clipPath: 'inset(0% 0% 0% 0% round 0rem)', ease: 'none',
+        scrollTrigger: { trigger: root.current, start: 'top 96%', end: 'top 35%', scrub: true },
+      });
   }, { scope: root });
 
   const scaleRows = TASKS.map(({ key, name, what }) => {
@@ -78,10 +59,7 @@ export default function Evidence({ metrics }) {
   return (
     <section id="evidence" ref={root} className="ln-section ln-evidence">
       <GhostWord word="Proof" side="right" />
-      <div className="ln-aurora ln-aurora-dark" aria-hidden="true">
-        <AuroraField palette="dark" />
-      </div>
-      <div ref={spot} className="ln-spot" aria-hidden="true" />
+      <div className="ln-aurora ln-aurora-dark" aria-hidden="true" />
       <div className="ln-grain-dark" aria-hidden="true" />
 
       <div className="ln-wrap" style={{ position: 'relative', zIndex: 2 }}>

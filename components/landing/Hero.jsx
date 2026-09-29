@@ -3,9 +3,7 @@
 import { useRef, useState } from 'react';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
-import AuroraField from '@/components/motion/AuroraField';
 import CountUp from '@/components/motion/CountUp';
-import MagneticButton from '@/components/motion/MagneticButton';
 import { fmtCr, cleanState } from '@/lib/api';
 import { monthLabel } from '@/lib/monthLabel';
 
@@ -85,88 +83,45 @@ export default function Hero({ kpis, kErr, flagged, flaggedLoading, flaggedError
     ? ((kpis.total_revised_cost_cr - kpis.total_original_cost_cr) / kpis.total_original_cost_cr) * 100
     : null;
 
+  // Intro timeline: eyebrow → headline lines → lead → facts → CTAs → card.
+  // Entrance-only (plays once); nothing animates while idle or scrolling.
   useGSAP(() => {
     if (prefersReducedMotion()) return;
     const q = gsap.utils.selector(root);
-    const fine = window.matchMedia('(pointer: fine)').matches;
 
-    // Intro timeline: eyebrow → headline lines → lead → facts → CTAs → card.
-    const tl = gsap.timeline({ delay: 0.25 });
+    const tl = gsap.timeline({ delay: 0.2 });
     tl.from(q('.ln-hero-eyebrow'), { y: 24, autoAlpha: 0, duration: 0.8 }, 0)
       .from(q('.ln-h1 .ln-w-inner'), { yPercent: 118, rotate: 3, duration: 1.25, stagger: 0.05, ease: 'power4.out' }, 0.1)
       .from(q('.ln-hero-lead'), { y: 30, autoAlpha: 0, duration: 0.9 }, 0.55)
       .from(q('.ln-hero-facts'), { y: 26, autoAlpha: 0, duration: 0.9 }, 0.7)
       .from(q('.ln-hero-actions > *'), { y: 22, autoAlpha: 0, duration: 0.7, stagger: 0.09 }, 0.82)
-      .from(q('.ln-slip'), { y: 60, autoAlpha: 0, rotate: 5, duration: 1.2, ease: 'power4.out' }, 0.65)
-      .from(q('.ln-scroll-hint'), { autoAlpha: 0, duration: 0.8 }, 1.3);
-
-    // Drift exit: every copy block leaves at its own depth while scrolling.
-    q('[data-drift]').forEach((el) => {
-      gsap.to(el, {
-        y: () => -76 * parseFloat(el.dataset.drift || '0.5'),
-        ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true },
-      });
-    });
-
-    // Proof card straightens and lifts away as you leave the hero.
-    gsap.to(q('.ln-slip-scrub'), {
-      rotate: 0, y: -56, ease: 'none',
-      scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: 0.6 },
-    });
-
-    // Pointer tilt on the card (desktop pointer-fine only).
-    const card = root.current.querySelector('.ln-slip');
-    if (card && fine) {
-      gsap.set(card, { transformPerspective: 900 });
-        const rx = gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3.out' });
-        const ry = gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3.out' });
-        const onTilt = (e) => {
-          const r = card.getBoundingClientRect();
-          const px = (e.clientX - r.left) / r.width - 0.5;
-          const py = (e.clientY - r.top) / r.height - 0.5;
-          ry(px * 7);
-          rx(py * -7);
-        };
-        const onFlat = () => { rx(0); ry(0); };
-        const zone = root.current;
-        zone.addEventListener('mousemove', onTilt, { passive: true });
-        zone.addEventListener('mouseleave', onFlat);
-        return () => {
-          zone.removeEventListener('mousemove', onTilt);
-          zone.removeEventListener('mouseleave', onFlat);
-        };
-      }
-    }, { scope: root });
+      .from(q('.ln-slip'), { y: 60, autoAlpha: 0, rotate: 5, duration: 1.2, ease: 'power4.out' }, 0.65);
+  }, { scope: root });
 
   return (
     <section ref={root} className="ln-hero" id="top">
-      <div className="ln-aurora" aria-hidden="true">
-        <AuroraField palette="day" />
-      </div>
+      <div className="ln-aurora" aria-hidden="true" />
 
       <div className="ln-wrap ln-hero-grid">
         <div className="ln-hero-copy">
-          <p className="ln-eyebrow ln-hero-eyebrow" data-drift="0.35"><span className="ln-idx">परख</span> Early warning · MoSPI Flash Reports</p>
+          <p className="ln-eyebrow ln-hero-eyebrow"><span className="ln-idx">परख</span> Early warning · MoSPI Flash Reports</p>
 
-          <h1 className="ln-display ln-h1 ln-split" data-drift="1" aria-label="Spot the projects about to slip, before the report says so.">
-            {'Spot the projects about to '.split(' ').map((w, i) => (
-              <span key={i} className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner">{w}&nbsp;</span></span>
-            ))}
-            <span className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner ln-accent">slip,</span></span>
-            <span className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner">&nbsp;</span></span>
-            {'before the report says so.'.split(' ').map((w, i) => (
-              <span key={`b${i}`} className="ln-w-mask" aria-hidden="true"><span className="ln-w-inner">{w}{i < 4 ? '\u00A0' : ''}</span></span>
+          <h1 className="ln-display ln-h1 ln-split" aria-label="Spot the projects about to slip, before the report says so.">
+            {'Spot the projects about to slip, before the report says so.'.split(' ').map((w, i) => (
+              <span key={i} aria-hidden="true">
+                <span className="ln-w-mask"><span className={`ln-w-inner ${w === 'slip,' ? 'ln-accent' : ''}`}>{w}</span></span>
+                {i < 10 ? ' ' : ''}
+              </span>
             ))}
           </h1>
 
-          <p className="ln-lead ln-hero-lead" data-drift="0.65">
+          <p className="ln-lead ln-hero-lead">
             Every month, MoSPI publishes a Flash Report on central infrastructure projects worth ₹150 crore or more.
             Parakh reads those PDFs, scores each project&rsquo;s risk with open rules, and estimates which
             completion dates will move in the next report.
           </p>
 
-          <p className="ln-hero-facts" data-drift="0.5">
+          <p className="ln-hero-facts">
             {kErr ? (
               <>The data snapshot did not load. Run <code>python src/run_all.py</code>, then reload.</>
             ) : kpis ? (
@@ -181,13 +136,9 @@ export default function Hero({ kpis, kErr, flagged, flaggedLoading, flaggedError
             )}
           </p>
 
-          <div className="ln-actions ln-hero-actions" data-drift="0.4">
-            <MagneticButton>
-              <a href="#watchlist" className="ln-btn ln-btn-blue" data-cursor>Open the watchlist <ArrowRight size={15} /></a>
-            </MagneticButton>
-            <MagneticButton>
-              <a href="#evidence" className="ln-btn ln-btn-ghost" data-cursor>How well does it predict?</a>
-            </MagneticButton>
+          <div className="ln-actions ln-hero-actions">
+            <a href="#watchlist" className="ln-btn ln-btn-blue" data-cursor>Open the watchlist <ArrowRight size={15} /></a>
+            <a href="#evidence" className="ln-btn ln-btn-ghost" data-cursor>How well does it predict?</a>
           </div>
         </div>
 
@@ -195,8 +146,6 @@ export default function Hero({ kpis, kErr, flagged, flaggedLoading, flaggedError
           <HeroSlip projects={flagged} month={month} onInspect={onInspect} loading={flaggedLoading} error={flaggedError} />
         </div>
       </div>
-
-      <div className="ln-scroll-hint" aria-hidden="true">Scroll</div>
     </section>
   );
 }

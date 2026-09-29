@@ -9,20 +9,14 @@ export default function Footer({ metrics }) {
   const wordRef = useRef(null);
 
   useGSAP(() => {
-    const mm = gsap.matchMedia();
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      // Each letter of the wordmark rises out of its own mask on arrival…
-      gsap.from(wordRef.current.querySelectorAll('.ln-f-inner'), {
-        yPercent: 112, rotate: 6, duration: 1.15, stagger: 0.05, ease: 'power4.out',
-        scrollTrigger: { trigger: wordRef.current, start: 'top 94%', once: true },
-      });
-      // …and the whole line drifts up a little slower than the page (parallax).
-      gsap.fromTo(wordRef.current, { yPercent: 18 }, {
-        yPercent: 0, ease: 'none',
-        scrollTrigger: { trigger: wordRef.current, start: 'top bottom', end: 'bottom bottom', scrub: true },
-      });
+    if (prefersReducedMotion()) return;
+    // Each letter of the wordmark rises out of its own mask on arrival.
+    // Masks sit flush (no flex gap) so letter spacing stays typographically
+    // correct — the old flex+gap layout wedged ~0.22em between every letter.
+    gsap.from(wordRef.current.querySelectorAll('.ln-f-inner'), {
+      yPercent: 112, rotate: 6, duration: 1.15, stagger: 0.05, ease: 'power4.out',
+      scrollTrigger: { trigger: wordRef.current, start: 'top 94%', once: true },
     });
-    return () => mm.revert();
   }, { scope: wordRef });
 
   return (

@@ -5,8 +5,6 @@ import { useProjectDetails } from '@/hooks/useProjectDetails';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/lib/api';
 import ProjectDossier from '@/components/ProjectDossier';
-import SmoothScroll from '@/components/motion/SmoothScroll';
-import Cursor from '@/components/motion/Cursor';
 import ProgressRail from '@/components/motion/ProgressRail';
 import Hero from '@/components/landing/Hero';
 import Ticker from '@/components/landing/Ticker';
@@ -22,6 +20,9 @@ import Footer from '@/components/landing/Footer';
 import metrics from '@/data/processed/model_metrics.json';
 import { ScrollTrigger } from '@/lib/gsap';
 
+// Perf notes (kimi/awwwards-redesign perf pass):
+// - No Lenis smooth-scroll, no custom cursor, no canvas aurora, no grain loop.
+// - All remaining motion is scroll-linked (ScrollTrigger) or entrance-once.
 export default function Home() {
   const { data: kpis, error: kErr } = useApi(api.kpis);
   const { data: alertsData, loading: aLoading, error: aErr } = useApi(() => api.alerts(50));
@@ -45,61 +46,58 @@ export default function Home() {
   }, [kpis, alertsData]);
 
   return (
-    <SmoothScroll>
-      <div className="ln-page">
-        <div className="ln-grain" aria-hidden="true" />
-        <ProgressRail />
-        <Cursor />
+    <div className="ln-page">
+      <div className="ln-grain" aria-hidden="true" />
+      <ProgressRail />
 
-        <main id="main-content" tabIndex={-1}>
-          {/* 1 — Hook: the hero with live proof card */}
-          <Hero kpis={kpis} kErr={kErr} flagged={flaggedAll.slice(0, 5)} flaggedLoading={aLoading} flaggedError={aErr} onInspect={openProject} />
+      <main id="main-content" tabIndex={-1}>
+        {/* 1 — Hook: the hero with live proof card */}
+        <Hero kpis={kpis} kErr={kErr} flagged={flaggedAll.slice(0, 5)} flaggedLoading={aLoading} flaggedError={aErr} onInspect={openProject} />
 
-          {/* 2 — Scale: vital-signs ticker */}
-          <Ticker kpis={kpis} />
+        {/* 2 — Scale: vital-signs ticker */}
+        <Ticker kpis={kpis} />
 
-          {/* 3 — The problem: rear-view mirror */}
-          <Problem kpis={kpis} months={metrics.months} />
+        {/* 3 — The problem: rear-view mirror */}
+        <Problem kpis={kpis} months={metrics.months} />
 
-          {/* 4 — The method: PDF → panel → score → ML */}
-          <Method kpis={kpis} monthsCount={metrics.months.length} />
+        {/* 4 — The method: PDF → panel → score → ML */}
+        <Method kpis={kpis} monthsCount={metrics.months.length} />
 
-          {/* 5 — The portfolio: band distribution + top drivers */}
-          <Portfolio kpis={kpis} />
+        {/* 5 — The portfolio: band distribution + top drivers */}
+        <Portfolio kpis={kpis} />
 
-          {/* 6 — The watchlist: live searchable high-risk table */}
-          <Watchlist
-            flagged={flagged} shown={shown} total={flagged.length}
-            query={query} setQuery={setQuery}
-            loading={aLoading} error={aErr} available={alertsData?.total_alerts} onInspect={openProject}
-          />
+        {/* 6 — The watchlist: live searchable high-risk table */}
+        <Watchlist
+          flagged={flagged} shown={shown} total={flagged.length}
+          query={query} setQuery={setQuery}
+          loading={aLoading} error={aErr} available={alertsData?.total_alerts} onInspect={openProject}
+        />
 
-          {/* 7 — The evidence: does ML beat rules? */}
-          <Evidence metrics={metrics} />
+        {/* 7 — The evidence: does ML beat rules? */}
+        <Evidence metrics={metrics} />
 
-          {/* 8 — The limits: honest admission of edges */}
-          <Limits kpis={kpis} metrics={metrics} />
+        {/* 8 — The limits: honest admission of edges */}
+        <Limits kpis={kpis} metrics={metrics} />
 
-          {/* 9 — Against the brief: SIH 26103 requirement map */}
-          <Brief />
+        {/* 9 — Against the brief: SIH 26103 requirement map */}
+        <Brief />
 
-          {/* 10 — Run it: open source, 3 commands */}
-          <RunIt />
-        </main>
+        {/* 10 — Run it: open source, 3 commands */}
+        <RunIt />
+      </main>
 
-        <Footer metrics={metrics} />
+      <Footer metrics={metrics} />
 
-        {(pending || detailError) && <p className="ln-error-notice" role={detailError ? "alert" : "status"}>{detailError || "Opening project record…"}</p>}
-        {detail && (
-          <ProjectDossier
-            key={detail.project.project_code}
-            {...detail}
-            onClose={close}
-            onOpenPeer={openProject}
-            returnLabel="Back to the page"
-          />
-        )}
-      </div>
-    </SmoothScroll>
+      {(pending || detailError) && <p className="ln-error-notice" role={detailError ? "alert" : "status"}>{detailError || "Opening project record…"}</p>}
+      {detail && (
+        <ProjectDossier
+          key={detail.project.project_code}
+          {...detail}
+          onClose={close}
+          onOpenPeer={openProject}
+          returnLabel="Back to the page"
+        />
+      )}
+    </div>
   );
 }

@@ -8,6 +8,11 @@ import { gsap, useGSAP } from '@/lib/gsap';
 // <Reveal>            — fades/translates its children up as they enter.
 // <SplitWords as="h2"> — word-by-word masked rise for display headings.
 //                        Keeps an unsplit accessible name via aria-label.
+//
+// Gap fix (the "Opensource,endtoend." bug): the inter-word space lives as a
+// PLAIN TEXT NODE between the mask spans. Spaces trailing INTO an
+// overflow-hidden inline-block collapse in Safari, which jammed the words
+// together; a text node between spans can't be clipped away.
 
 export function Reveal({ children, className = '', style, delay = 0, y = 30, stagger = 0.06, once = true }) {
   const ref = useRef(null);
@@ -58,14 +63,11 @@ export function SplitWords({ as: Tag = 'h2', text, className = '', accent = [], 
   return (
     <Tag ref={ref} className={`${className} ln-split`} aria-label={text}>
       {words.map((w, i) => (
-        <span key={i} className="ln-w-mask" aria-hidden="true">
-          {/* The word break lives INSIDE the inner span as a no-break space:
-              a plain trailing space inside an overflow-hidden inline-block is
-              collapsed by line layout, which jammed headings together. */}
-          <span className={`ln-w-inner ${accent.includes(w.replace(/[.,;—]/g, '')) ? accentClass : ''}`}>
-            {w}
-            {i < words.length - 1 ? '\u00A0' : ''}
+        <span key={i} aria-hidden="true">
+          <span className="ln-w-mask">
+            <span className={`ln-w-inner ${accent.includes(w.replace(/[.,;—]/g, '')) ? accentClass : ''}`}>{w}</span>
           </span>
+          {i < words.length - 1 ? ' ' : ''}
         </span>
       ))}
     </Tag>
