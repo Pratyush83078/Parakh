@@ -284,33 +284,48 @@
 .ln-section > .ln-wrap { position: relative; z-index: 1; }
 .ln-section-head { display: grid; gap: 1.4rem; margin-bottom: clamp(2.5rem, 6vh, 4.5rem); }
 
-/* Ghost mega-words drifting behind the sections */
+/* Ghost mega-words → clean vertical word-rails. Replaces the huge stroked
+   background words: each section prints its keyword once, upright, tucked
+   against the section's top rule — quiet, readable, no visual noise.
+   The dot in front is the section's number tick. */
 .ln-ghost {
-  position: absolute; z-index: 0; right: -0.05em;
-  font-family: var(--ln-serif); font-weight: 600; line-height: 0.82;
-  font-size: clamp(6.5rem, 20vw, 17rem); letter-spacing: -0.02em;
-  color: transparent; -webkit-text-stroke: 1.5px rgba(231, 235, 244, 0.08);
-  white-space: nowrap; user-select: none; pointer-events: none;
-  will-change: transform;
+  display: none;
 }
-.ln-ghost.is-left { right: auto; left: -0.05em; }
-.ln-evidence .ln-ghost { -webkit-text-stroke-color: rgba(239, 236, 226, 0.12); }
-@media (max-width: 720px) { .ln-ghost { font-size: clamp(4.5rem, 26vw, 8rem); opacity: 0.8; } }
+.ln-section::before {
+  content: attr(data-word);
+  position: absolute; top: clamp(1.4rem, 4vh, 2.6rem); left: 0;
+  writing-mode: vertical-rl; text-orientation: mixed;
+  font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.34em; text-transform: uppercase;
+  color: var(--ln-ink-35); opacity: 0.85;
+  padding-left: 2px; user-select: none; pointer-events: none;
+}
+@media (max-width: 1240px) { .ln-section::before { display: none; } }
 .ln-split-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
 @media (max-width: 900px) { .ln-split-2 { grid-template-columns: 1fr; } }
 
-/* Problem: month bars */
-.ln-months { border: 1px solid var(--ln-hairline); border-radius: 14px; background: var(--ln-card); padding: 1.8rem; margin: 0; }
-.ln-months-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 92px; gap: 1rem 1.2rem; align-items: stretch; height: auto; }
-.ln-month { display: grid; grid-template-rows: auto 1fr auto; gap: 0.35rem; justify-items: center; align-content: stretch; min-width: 0; height: 100%; font-size: 0.82rem; line-height: 1.35; color: var(--ln-ink-60); }
-.ln-month b { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 620; color: var(--ln-ink); }
-.ln-month-bar { align-self: end; width: 100%; max-width: 54px; min-height: 8px; background: linear-gradient(180deg, var(--ln-blue), rgba(35,55,224,0.55)); border-radius: 5px 5px 2px 2px; transform-origin: bottom; }
-.ln-month:last-child .ln-month-bar { background: linear-gradient(180deg, #cd4239, rgba(205,66,57,0.6)); animation: ln-risk-pulse 2.4s ease-in-out infinite; }
+/* Problem: month bars — compact, horizontally scrollable so future report
+   months extend sideways instead of growing the section. */
+.ln-months { border: 1px solid var(--ln-hairline); border-radius: 14px; background: var(--ln-card); padding: 1.4rem 1.4rem 1.1rem; margin: 0; }
+.ln-months-scroller { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: var(--ln-scrollbar) transparent; padding-bottom: 4px; }
+.ln-months-grid { display: flex; gap: 1.1rem; min-width: min-content; }
+.ln-month { display: grid; grid-template-rows: auto 1fr auto; gap: 0.45rem; justify-items: center; flex: 0 0 auto; width: 76px; font-size: 0.8rem; line-height: 1.3; color: var(--ln-ink-60); }
+.ln-month b { font-family: var(--font-mono); font-size: 1rem; font-weight: 620; color: var(--ln-ink); }
+.ln-month-bar { align-self: end; width: 26px; min-height: 8px; background: linear-gradient(180deg, var(--ln-blue), color-mix(in srgb, var(--ln-blue) 55%, transparent)); border-radius: 5px 5px 2px 2px; transform-origin: bottom; }
+.ln-month:last-child .ln-month-bar { background: linear-gradient(180deg, var(--ln-up), color-mix(in srgb, var(--ln-up) 60%, transparent)); animation: ln-risk-pulse 2.4s ease-in-out infinite; }
 @keyframes ln-risk-pulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.22); } }
 .ln-months figcaption { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px dashed var(--ln-hairline); font-size: 0.9rem; line-height: 1.55; color: var(--ln-ink-60); }
 .ln-months figcaption b { color: #b3342c; }
-@media (max-width: 720px) { .ln-months { padding: 1.25rem; } .ln-months-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 88px; gap: 0.8rem; } }
-@media (max-width: 480px) { .ln-months-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 84px; } .ln-month b { font-size: 0.98rem; } }
+@media (max-width: 720px) { .ln-months { padding: 1.1rem; } .ln-months-grid { gap: 0.9rem; } .ln-month { width: 68px; } }
+
+/* Screenshot pin: the pinned-card motif from the user's reference — a soft
+   blue pin tab docked to the top-right of each dark card, echoing the hero
+   proof-card's washi tab. Purely decorative. */
+.ln-pin { position: absolute; top: -11px; right: 18px; z-index: 1;
+  width: 54px; height: 18px; border-radius: 3px;
+  background: color-mix(in srgb, var(--ln-blue) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ln-blue) 38%, transparent);
+  transform: rotate(2deg); pointer-events: none; }
 
 /* Method: 4 steps */
 .ln-pipeline { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--ln-hairline); border-radius: 14px; overflow: hidden; background: var(--ln-card); }
@@ -434,15 +449,16 @@
 .ln-run-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
 @media (max-width: 900px) { .ln-run-grid { grid-template-columns: 1fr; } }
 .ln-code {
-  background: #090C13; color: #C7D3E6; border: 1px solid var(--ln-hairline); border-radius: 14px;
+  background: var(--ln-dark); color: var(--ln-ink); border: 1px solid var(--ln-hairline); border-radius: 14px;
   padding: 1.7rem 1.8rem; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.9;
   overflow-x: auto; margin: 0; position: relative;
-  box-shadow: 0 24px 64px -30px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  box-shadow: var(--ln-shadow-card);
 }
 .ln-code::before { content: 'parakh — local run'; position: absolute; top: 0.95rem; left: 1.2rem; right: 1.2rem;
-  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(199, 211, 230, 0.35); }
+  font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ln-ink-35); }
 .ln-code code { display: block; padding-top: 1.1rem; }
-.ln-code .ln-cmd::before { content: '$ '; color: var(--ln-cyan); }
+.ln-code .ln-cmd { color: var(--ln-cyan); }
+.ln-code .ln-cmd::before { content: '$ '; color: var(--ln-blue); font-weight: 600; }
 /* Typewriter: blinking block caret rides the line being typed. */
 .ln-cmd.is-active::after { content: ''; display: inline-block; width: 0.55em; height: 1em;
   margin-left: 0.12em; vertical-align: -0.12em; background: var(--ln-cyan);

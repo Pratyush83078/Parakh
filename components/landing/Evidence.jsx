@@ -1,5 +1,4 @@
 'use client';
-import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
@@ -57,8 +56,8 @@ export default function Evidence({ metrics }) {
   const costM = metrics.cost_revised_up_label;
 
   return (
-    <section id="evidence" ref={root} className="ln-section ln-evidence">
-      <GhostWord word="Proof" side="right" />
+    <section id="evidence" ref={root} className="ln-section ln-evidence" data-word="Proof">
+      
       <div className="ln-aurora ln-aurora-dark" aria-hidden="true" />
       <div className="ln-grain-dark" aria-hidden="true" />
 

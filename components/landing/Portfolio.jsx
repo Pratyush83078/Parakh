@@ -1,5 +1,4 @@
 'use client';
-import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap';
@@ -32,8 +31,8 @@ export default function Portfolio({ kpis }) {
   }, { scope: ref, dependencies: [kpis] });
 
   return (
-    <section id="portfolio" className="ln-section" ref={ref}>
-      <GhostWord word="Risk" side="right" />
+    <section id="portfolio" className="ln-section" ref={ref} data-word="Risk">
+      
       <div className="ln-wrap">
         <Reveal className="ln-section-head">
           <p className="ln-eyebrow"><span className="ln-idx">03</span> The portfolio</p>

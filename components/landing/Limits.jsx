@@ -13,7 +13,7 @@ export default function Limits({ kpis, metrics }) {
   ];
 
   return (
-    <section id="limits" className="ln-section">
+    <section id="limits" className="ln-section" data-word="Limits">
       <div className="ln-wrap">
         <Reveal className="ln-section-head">
           <p className="ln-eyebrow"><span className="ln-idx">06</span> The limits</p>

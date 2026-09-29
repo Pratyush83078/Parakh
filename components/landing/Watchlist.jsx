@@ -1,5 +1,4 @@
 'use client';
-import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import Link from 'next/link';
@@ -30,8 +29,8 @@ export default function Watchlist({ flagged, shown, total, query, setQuery, load
   }, { scope: bodyRef, dependencies: [shown], revertOnUpdate: true });
 
   return (
-    <section id="watchlist" className="ln-section">
-      <GhostWord word="Watch" side="left" />
+    <section id="watchlist" className="ln-section" data-word="Watch">
+      
       <div className="ln-wrap">
         <div className="ln-watch-head">
           <div>

@@ -1,5 +1,4 @@
 'use client';
-import GhostWord from '@/components/motion/GhostWord';
 
 import { useRef } from 'react';
 import { FileText, Table2, Calculator, LineChart } from 'lucide-react';
@@ -48,8 +47,8 @@ export default function Method({ kpis, monthsCount }) {
   }, { scope: weightsRef });
 
   return (
-    <section id="method" className="ln-section">
-      <GhostWord word="Rules" side="left" />
+    <section id="method" className="ln-section" data-word="Rules">
+      
       <div className="ln-wrap">
         <Reveal className="ln-section-head">
           <p className="ln-eyebrow"><span className="ln-idx">02</span> The method</p>
