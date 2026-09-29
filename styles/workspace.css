@@ -18,15 +18,26 @@ button, input, select { font: inherit; }
 button, summary, select { cursor: pointer; }
 button:disabled { opacity: .48; cursor: not-allowed; transform: none; }
 :focus-visible { outline: 2px solid var(--ln-blue); outline-offset: 4px; }
-::selection { background: rgba(91, 120, 255, 0.35); color: #fff; }
+::selection { background: var(--ln-selection); color: var(--ln-ink); }
 input { caret-color: var(--ln-blue); }
 input::placeholder { color: var(--ln-ink-60); opacity: 1; }
 a { text-underline-offset: .2em; }
-* { scrollbar-width: thin; scrollbar-color: rgba(231, 235, 244, 0.25) transparent; }
-.skip-link { position: fixed; top: 8px; left: 16px; z-index: 1100; transform: translateY(-150%); background: var(--ln-ink); color: white; padding: 12px 20px; border-radius: 6px; }
+* { scrollbar-width: thin; scrollbar-color: var(--ln-scrollbar) transparent; }
+.skip-link { position: fixed; top: 8px; left: 16px; z-index: 1100; transform: translateY(-150%); background: var(--ln-ink); color: var(--ln-paper); padding: 12px 20px; border-radius: 6px; }
 .skip-link:focus { transform: none; }
 
-.site-header { position: sticky; top: 0; z-index: 950; background: rgba(11, 14, 21, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ln-hairline); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+/* Theme toggle — fixed dock button, both worlds. */
+.theme-toggle {
+  position: fixed; right: 18px; bottom: 18px; z-index: 1000;
+  width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; border: 1px solid var(--ln-hairline);
+  background: var(--ln-card); color: var(--ln-ink); cursor: pointer;
+  box-shadow: var(--ln-shadow-card);
+  transition: transform .25s var(--ln-ease-out), border-color .2s, color .2s;
+}
+.theme-toggle:hover { transform: translateY(-2px); border-color: var(--ln-blue); color: var(--ln-blue); }
+
+.site-header { position: sticky; top: 0; z-index: 950; background: var(--ln-header-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ln-hairline); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
 .site-header.is-hidden { transform: translateY(-100%); }
 @media (prefers-reduced-motion: reduce) { .site-header { transition: none; } .site-header.is-hidden { transform: none; } }
 .site-header-inner { width: min(1400px, 92vw); margin: auto; min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }

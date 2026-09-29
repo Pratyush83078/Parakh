@@ -1,6 +1,7 @@
 import './globals.css';
 import AppShell from '@/components/AppShell';
 import CommandPalette from '@/components/CommandPalette';
+import ThemeToggle from '@/components/ThemeToggle';
 import { Geist, Geist_Mono, Tiro, FrauncesFont } from '@/lib/fonts';
 
 export const metadata = {
@@ -20,11 +21,16 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       className={`${Geist.variable} ${Geist_Mono.variable} ${Tiro.variable} ${FrauncesFont.variable}`}
-      data-theme="light"
+      data-theme="dark"
       data-style="minimalist"
       suppressHydrationWarning
     >
+      <head>
+        {/* Apply the saved theme before first paint — no light/dark flash. */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('parakh-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t)}}catch(e){}` }} />
+      </head>
       <body>
+        <ThemeToggle />
         <AppShell>{children}</AppShell>
         <CommandPalette />
       </body>

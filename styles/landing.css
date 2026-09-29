@@ -3,6 +3,12 @@
    Plan: kimi.md · Motion: gsap + lenis + motion (see .agents/skills/awwwards-animations)
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ══ THEME KNOBS ══════════════════════════════════════════════════════════
+   Every color the landing + workspace use flows through these tokens.
+   Dark (default, `:root`): deep blue-black canvas, electric blue + mint.
+   Light (`[data-theme="light"]` on <html>): the main-branch paper palette.
+   Typography knobs live in tokens.css (--font-*) and the .ln-display/
+   .ln-h1/.ln-h2 size clamps just below — change them once, they cascade. */
 :root {
   /* Dark techie: deep blue-black canvas, electric blue + mint signal accents */
   --ln-paper: #0B0E15;
@@ -19,10 +25,37 @@
   --ln-leaf: #34D399;
   --ln-dark: #06070C;
   --ln-dark-2: #0C101A;
+  --ln-header-bg: rgba(11, 14, 21, 0.82);
+  --ln-selection: rgba(91, 120, 255, 0.35);
+  --ln-scrollbar: rgba(231, 235, 244, 0.25);
   --ln-serif: var(--font-fraunces), 'Fraunces', Georgia, serif;
   --ln-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ln-shadow-card: 0 24px 64px -28px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
+
+/* Light / day mode — the main-branch "blueprint on paper" palette. */
+[data-theme="light"] {
+  --ln-paper: #f2efe6;
+  --ln-paper-2: #ebe7da;
+  --ln-card: #faf8f1;
+  --ln-ink: #191914;
+  --ln-ink-60: rgba(25, 25, 20, 0.6);
+  --ln-ink-35: rgba(25, 25, 20, 0.35);
+  --ln-hairline: rgba(25, 25, 20, 0.16);
+  --ln-blue: #2337e0;
+  --ln-blue-soft: rgba(35, 55, 224, 0.09);
+  --ln-cyan: #0e7c63;
+  --ln-saffron: #e8a33d;
+  --ln-leaf: #2c8c66;
+  --ln-dark: #12120f;
+  --ln-dark-2: #1a1a15;
+  --ln-header-bg: rgba(242, 239, 230, 0.82);
+  --ln-selection: #dce0ff;
+  --ln-scrollbar: #aca99e;
+  --ln-shadow-card: 0 32px 72px -24px rgba(25, 25, 20, 0.28), 0 2px 0 rgba(25, 25, 20, 0.04);
+  --ln-up: #b3342c;
+}
+:root { --ln-up: #FF7A6B; }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
 .ln-page {
@@ -61,10 +94,19 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity: 0.05; mix-blend-mode: overlay;
 }
+[data-theme="light"] .ln-grain { opacity: 0.07; }
+
+/* Aurora in light mode: softer, warmer tints so the paper stays crisp. */
+[data-theme="light"] .ln-aurora {
+  background:
+    radial-gradient(42% 58% at 74% 16%, rgba(35, 55, 224, 0.10), transparent 70%),
+    radial-gradient(30% 44% at 16% 62%, rgba(232, 163, 61, 0.12), transparent 70%),
+    radial-gradient(36% 52% at 52% 98%, rgba(44, 140, 102, 0.08), transparent 70%);
+}
 
 /* ── Reading progress rail ────────────────────────────────────────────────── */
 .ln-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 980;
-  background: linear-gradient(90deg, var(--ln-blue), rgba(35, 55, 224, 0.55));
+  background: linear-gradient(90deg, var(--ln-blue), color-mix(in srgb, var(--ln-blue) 55%, transparent));
   transform-origin: left; transform: scaleX(0); pointer-events: none; }
 
 /* ── Type primitives ─────────────────────────────────────────────────────── */
@@ -130,7 +172,7 @@
   border-bottom: 1px solid transparent;
 }
 .ln-nav.is-scrolled {
-  background: rgba(11, 14, 21, 0.78); backdrop-filter: blur(14px) saturate(1.2);
+  background: var(--ln-header-bg); backdrop-filter: blur(14px) saturate(1.2);
   border-bottom-color: var(--ln-hairline);
 }
 .ln-nav-row { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; }
@@ -159,7 +201,7 @@
 .ln-hero-copy > * + * { margin-top: 1.6rem; }
 .ln-hero-facts { font-size: 0.95rem; line-height: 1.75; color: var(--ln-ink-60); border-left: 2px solid var(--ln-blue); padding-left: 1.1rem; max-width: 52ch; }
 .ln-hero-facts b { color: var(--ln-ink); font-weight: 620; }
-.ln-up { color: #FF7A6B; }
+.ln-up { color: var(--ln-up); }
 .ln-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: center; }
 .ln-scroll-hint {
   position: absolute; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
@@ -204,10 +246,10 @@
 /* Risk band pills (semantic colors unchanged) */
 .ln-band { display: inline-flex; align-items: baseline; gap: 0.5em; font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.32em 0.75em; border-radius: 999px; }
 .ln-band b { font-size: 0.85rem; letter-spacing: -0.02em; }
-.band-Critical { background: rgba(239, 68, 68, 0.16); color: #FF8A7E; }
-.band-High { background: rgba(249, 115, 22, 0.16); color: #FFB061; }
-.band-Medium { background: rgba(245, 197, 24, 0.13); color: #FFD666; }
-.band-Low { background: rgba(52, 211, 153, 0.14); color: #4ADE9D; }
+.band-Critical { background: rgba(239, 68, 68, 0.16); color: var(--ln-up, #FF8A7E); }
+.band-High { background: rgba(249, 115, 22, 0.16); color: #e06a14; }
+.band-Medium { background: rgba(245, 197, 24, 0.13); color: #b8860b; }
+.band-Low { background: rgba(52, 211, 153, 0.14); color: var(--ln-leaf); }
 .band-bg-Critical { background: #cd4239; } .band-bg-High { background: #e06a14; }
 .band-bg-Medium { background: #c49206; } .band-bg-Low { background: #2c8c66; }
 
@@ -317,7 +359,7 @@
 .ln-table tbody tr { transition: background 0.25s; }
 .ln-table tbody tr:hover { background: var(--ln-blue-soft); }
 /* Critical rows carry a signal-red spine; rows answer hover with a nudge. */
-.ln-table tbody tr.ln-row-critical td:first-child { box-shadow: inset 3px 0 0 #FF5A4E; }
+.ln-table tbody tr.ln-row-critical td:first-child { box-shadow: inset 3px 0 0 var(--ln-up); }
 .ln-table tbody tr:hover .ln-row-link { transform: translateX(4px); }
 .ln-table tbody tr:last-child td { border-bottom: 0; }
 .ln-table .is-num { text-align: right; }
@@ -374,10 +416,10 @@
 .ln-brief-item { font-weight: 580; }
 .ln-brief-detail { font-size: 0.86rem; line-height: 1.5; color: var(--ln-ink-60); }
 .ln-status { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 650; letter-spacing: 0.09em; text-transform: uppercase; padding: 0.4em 0.8em; border-radius: 999px; white-space: nowrap; }
-.status-built { background: rgba(52, 211, 153, 0.14); color: #4ADE9D; }
-.status-measured { background: rgba(91, 120, 255, 0.16); color: #9FB0FF; }
-.status-partial, .status-in-progress { background: rgba(232, 163, 61, 0.15); color: #FFC96B; }
-.status-planned { background: rgba(231, 235, 244, 0.07); color: var(--ln-ink-60); }
+.status-built { background: rgba(52, 211, 153, 0.14); color: var(--ln-leaf); }
+.status-measured { background: var(--ln-blue-soft); color: var(--ln-blue); }
+.status-partial, .status-in-progress { background: rgba(232, 163, 61, 0.15); color: var(--ln-saffron); }
+.status-planned { background: var(--ln-paper-2); color: var(--ln-ink-60); }
 @media (max-width: 720px) { .ln-brief li { grid-template-columns: 1fr; gap: 0.45rem; } }
 
 /* Run it */

@@ -12,9 +12,9 @@ dialog.dossier-dialog {
   overflow-y: auto; overscroll-behavior: contain;
   animation: dossier-rise 0.55s var(--ln-ease-out);
 }
-dialog.dossier-dialog::backdrop { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); }
+dialog.dossier-dialog::backdrop { background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(5px); }
 dialog.dossier-dialog::-webkit-scrollbar { width: 10px; }
-dialog.dossier-dialog::-webkit-scrollbar-thumb { background: rgba(231, 235, 244, 0.22); border-radius: 99px; border: 3px solid var(--ln-paper); }
+dialog.dossier-dialog::-webkit-scrollbar-thumb { background: var(--ln-scrollbar); border-radius: 99px; border: 3px solid var(--ln-paper); }
 @keyframes dossier-rise {
   from { transform: translateY(4.5vh); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -32,7 +32,7 @@ dialog.dossier-dialog::-webkit-scrollbar-thumb { background: rgba(231, 235, 244,
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   padding: 0.9rem min(4vw, calc((100vw - 1240px) / 2 + 4vw));
-  background: rgba(11, 14, 21, 0.82); backdrop-filter: blur(14px) saturate(1.2);
+  background: var(--ln-header-bg); backdrop-filter: blur(14px) saturate(1.2);
   border-bottom: 1px solid var(--ln-hairline);
 }
 .ds-back {
